@@ -4,10 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import javax.swing.JFrame;
 
-import com.jogamp.opengl.GLAutoDrawable;
-import com.jogamp.opengl.GLCapabilities;
-import com.jogamp.opengl.GLEventListener;
-import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLJPanel;
 import com.jogamp.opengl.util.FPSAnimator;
 
@@ -63,7 +60,17 @@ public class Game extends JFrame implements GLEventListener {
 
 	@Override
 	public void display(GLAutoDrawable drawable) {
-		// TODO Auto-generated method stub
+		GL2 gl = drawable.getGL().getGL2();
+
+		// TODO
+		// set the view matrix based on the camera position
+		//myCamera.setView(gl);
+
+		// update the objects
+		//update();
+
+		// draw the scene tree
+		//GameObject.ROOT.draw(gl);
 		
 	}
 
@@ -82,7 +89,12 @@ public class Game extends JFrame implements GLEventListener {
 	@Override
 	public void reshape(GLAutoDrawable drawable, int x, int y, int width,
 			int height) {
-		// TODO Auto-generated method stub
+
+		// tell the camera and the mouse that the screen has reshaped
+		GL2 gl = drawable.getGL().getGL2();
+
+		// TODO
+		//myCamera.reshape(gl, x, y, width, height);
 		
 	}
 }
