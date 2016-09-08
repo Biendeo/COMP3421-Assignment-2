@@ -2,8 +2,13 @@ package ass2.spec;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JFrame;
 
+import ass2.game.Camera;
+import ass2.game.GameObject;
+import ass2.game.Updatable;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLJPanel;
 import com.jogamp.opengl.util.FPSAnimator;
@@ -17,10 +22,14 @@ import com.jogamp.opengl.util.FPSAnimator;
  */
 public class Game extends JFrame implements GLEventListener {
 
+	private long myTime;
+
 	private Terrain myTerrain;
+	private Camera currentCamera;
 
 	public Game(Terrain terrain) {
 		super("Assignment 2");
+		myTime = 0L;
 		myTerrain = terrain;
    
 	}
@@ -55,22 +64,35 @@ public class Game extends JFrame implements GLEventListener {
 	public static void main(String[] args) throws FileNotFoundException {
 		Terrain terrain = LevelIO.load(new File(args[0]));
 		Game game = new Game(terrain);
+		game.currentCamera = new Camera(GameObject.ROOT);
 		game.run();
+	}
+
+	/**
+	 * Updates every GameObject and computes the delta time for them.
+	 */
+	private void update() {
+
+		// compute the time since the last frame
+		long time = System.currentTimeMillis();
+		double dt = (time - myTime) / 1000.0;
+		myTime = time;
+
+		GameObject.ROOT.tryUpdate(dt);
 	}
 
 	@Override
 	public void display(GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
 
-		// TODO
 		// set the view matrix based on the camera position
-		//myCamera.setView(gl);
+		currentCamera.setView(gl);
 
 		// update the objects
-		//update();
+		update();
 
 		// draw the scene tree
-		//GameObject.ROOT.draw(gl);
+		GameObject.ROOT.tryDraw(gl);
 		
 	}
 
