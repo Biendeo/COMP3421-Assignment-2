@@ -16,7 +16,7 @@ public class GameObject {
 	private GameObject parent;
 	private ArrayList<GameObject> children;
 
-	private Transform transform;
+	public Transform transform;
 
 	private boolean enabled;
 
@@ -60,7 +60,7 @@ public class GameObject {
 
 	public void tryUpdate(double dt) {
 		if (enabled) {
-			if (this.getClass().isAssignableFrom(Updatable.class)) {
+			if (this instanceof Updatable) {
 				((Updatable)this).update(dt);
 			}
 			ArrayList<GameObject> childrenClonedList = new ArrayList<GameObject>(children);
@@ -76,14 +76,23 @@ public class GameObject {
 	 */
 	public void tryDraw(GL2 gl) {
 		if (enabled) {
-			// TODO: Position the view frame.
-			if (this.getClass().isAssignableFrom(Drawable.class)) {
+
+			gl.glPushMatrix();
+			gl.glTranslated(transform.position.x, transform.position.y, transform.position.z);
+			gl.glRotated(transform.rotation.x, 1.0, 0.0, 0.0);
+			gl.glRotated(transform.rotation.y, 0.0, 1.0, 0.0);
+			gl.glRotated(transform.rotation.z, 0.0, 0.0, 1.0);
+			gl.glScaled(transform.scale.x, transform.scale.y, transform.scale.z);
+
+			if (this instanceof Drawable) {
 				((Drawable)this).draw(gl);
 			}
 			ArrayList<GameObject> childrenClonedList = new ArrayList<GameObject>(children);
 			for (GameObject o : childrenClonedList) {
 				o.tryDraw(gl);
 			}
+
+			gl.glPopMatrix();
 		}
 	}
 

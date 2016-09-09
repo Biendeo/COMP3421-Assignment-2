@@ -9,6 +9,7 @@ import javax.swing.JFrame;
 import ass2.game.Camera;
 import ass2.game.GameObject;
 import ass2.game.Updatable;
+import ass2.math.Vector3;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLJPanel;
 import com.jogamp.opengl.util.FPSAnimator;
@@ -65,6 +66,7 @@ public class Game extends JFrame implements GLEventListener {
 		Terrain terrain = LevelIO.load(new File(args[0]));
 		Game game = new Game(terrain);
 		game.currentCamera = new Camera(GameObject.ROOT);
+		game.currentCamera.transform.position = new Vector3(0.0, 1.0, -10.0);
 		game.run();
 	}
 
@@ -115,8 +117,7 @@ public class Game extends JFrame implements GLEventListener {
 		// tell the camera and the mouse that the screen has reshaped
 		GL2 gl = drawable.getGL().getGL2();
 
-		// TODO
-		//myCamera.reshape(gl, x, y, width, height);
+		currentCamera.reshape(gl, x, y, width, height);
 		
 	}
 }

@@ -10,6 +10,9 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
+import ass2.game.Drawable;
+import ass2.game.GameObject;
+import com.jogamp.opengl.GL2;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -20,7 +23,7 @@ import org.json.JSONTokener;
  *
  * @author malcolmr
  */
-public class Terrain {
+public class Terrain extends GameObject implements Drawable {
 
 	private Dimension mySize;
 	private double[][] myAltitude;
@@ -35,6 +38,7 @@ public class Terrain {
 	 * @param depth The number of vertices in the z-direction
 	 */
 	public Terrain(int width, int depth) {
+		super(GameObject.ROOT);
 		mySize = new Dimension(width, depth);
 		myAltitude = new double[width][depth];
 		myTrees = new ArrayList<Tree>();
@@ -132,9 +136,26 @@ public class Terrain {
 	 * @return
 	 */
 	public double altitude(double x, double z) {
-		double altitude = 0;
+		double altitude = 0.0;
 
+		boolean integerX = false;
+		boolean integerZ = false;
+		int x1 = 0;
+		int x2 = 0;
+		int z1 = 0;
+		int z2 = 0;
 
+		if ((x < 0 || x > mySize.width || z < 0 || z > mySize.height)) {
+			return altitude;
+		}
+
+		x1 = (int)Math.floor(x);
+		x2 = (int)Math.ceil(x);
+		z1 = (int)Math.floor(z);
+		z2 = (int)Math.ceil(z);
+
+		// TODO: This is not correct, it just floors the value.
+		altitude = myAltitude[x1][z1];
 
 		return altitude;
 	}
@@ -165,4 +186,22 @@ public class Terrain {
 	}
 
 
+	@Override
+	public void draw(GL2 gl) {
+		for (int x = 0; x < mySize.width - 1; ++x) {
+			for (int z = 0; z < mySize.height - 1; ++z) {
+				gl.glColor3d(1.0, 1.0, 1.0);
+				gl.glBegin(GL2.GL_LINE_LOOP);
+				gl.glVertex3d(x, altitude(x, z), z);
+				gl.glVertex3d(x + 1, altitude(x + 1, z), z);
+				gl.glVertex3d(x, altitude(x, z + 1), z + 1);
+				gl.glEnd();
+				gl.glBegin(GL2.GL_LINE_LOOP);
+				gl.glVertex3d(x + 1, altitude(x + 1, z), z);
+				gl.glVertex3d(x, altitude(x, z + 1), z + 1);
+				gl.glVertex3d(x + 1, altitude(x + 1, z + 1), z + 1);
+				gl.glEnd();
+			}
+		}
+	}
 }

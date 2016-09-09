@@ -20,7 +20,7 @@ public class Camera extends GameObject {
 		clearColor[0] = 0.5f;
 		clearColor[1] = 0.5f;
 		clearColor[2] = 0.9f;
-		nearPlane = 0.01;
+		nearPlane = 0.1;
 		farPlane = 1000.0;
 	}
 
@@ -41,8 +41,6 @@ public class Camera extends GameObject {
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glLoadIdentity();
 
-		// This is commented out because the getGlobal functions aren't in the program yet.
-		/*
 		Vector3 globalTranslate = getGlobalPositionVector();
 		Vector3 globalRotate = getGlobalRotationVector();
 		Vector3 globalScale = getGlobalScaleVector();
@@ -52,6 +50,34 @@ public class Camera extends GameObject {
 		gl.glRotated(-globalRotate.y, 0.0, 1.0, 0.0);
 		gl.glRotated(-globalRotate.x, 1.0, 0.0, 0.0);
 		gl.glTranslated(-globalTranslate.x, -globalTranslate.y, -globalTranslate.z);
-		*/
+	}
+
+
+	public void reshape(GL2 gl, int x, int y, int width, int height) {
+
+		// match the projection aspect ratio to the viewport
+		// to avoid stretching
+
+		gl.glMatrixMode(GL2.GL_PROJECTION);
+		gl.glLoadIdentity();
+
+		double top, bottom, left, right;
+
+		if (width > height) {
+			double aspect = (1.0 * width) / height;
+			top = 1.0;
+			bottom = -1.0;
+			left = -aspect;
+			right = aspect;
+		} else {
+			double aspect = (1.0 * height) / width;
+			top = aspect;
+			bottom = -aspect;
+			left = -1.0;
+			right = 1.0;
+		}
+
+		// TODO: Determine how to calculate this.
+		gl.glFrustum(left, right, bottom, top, nearPlane, farPlane);
 	}
 }
