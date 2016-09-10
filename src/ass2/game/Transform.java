@@ -12,8 +12,8 @@ public class Transform {
 	public Vector3 scale;
 
 	public Transform() {
-		position = new Vector3();
-		rotation = new Vector3();
-		scale = new Vector3();
+		position = new Vector3(0.0, 0.0, 0.0);
+		rotation = new Vector3(0.0, 0.0, 0.0);
+		scale = new Vector3(1.0, 1.0, 1.0);
 	}
 }

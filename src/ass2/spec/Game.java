@@ -66,7 +66,8 @@ public class Game extends JFrame implements GLEventListener {
 		Terrain terrain = LevelIO.load(new File(args[0]));
 		Game game = new Game(terrain);
 		game.currentCamera = new Camera(GameObject.ROOT);
-		game.currentCamera.transform.position = new Vector3(0.0, 1.0, -10.0);
+		game.currentCamera.transform.position = new Vector3(5.0, 3.0, 10.0);
+		game.currentCamera.transform.rotation = new Vector3(0.0, 0.0, 0.0);
 		game.run();
 	}
 

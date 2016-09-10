@@ -12,6 +12,7 @@ public class Camera extends GameObject {
 
 	private double nearPlane;
 	private double farPlane;
+	private double fov;
 
 	public Camera(GameObject parent) {
 		super(parent);
@@ -22,6 +23,9 @@ public class Camera extends GameObject {
 		clearColor[2] = 0.9f;
 		nearPlane = 0.1;
 		farPlane = 1000.0;
+		fov = 85.0;
+
+		this.transform.scale = new Vector3(1.0, 1.0, 1.0);
 	}
 
 	// TODO: Background getter setter.
@@ -78,6 +82,6 @@ public class Camera extends GameObject {
 		}
 
 		// TODO: Determine how to calculate this.
-		gl.glFrustum(left, right, bottom, top, nearPlane, farPlane);
+		gl.glFrustum(left, right, bottom, top, 1 / Math.tan(Math.toRadians(fov / 2)), farPlane);
 	}
 }
