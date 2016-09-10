@@ -81,7 +81,7 @@ public class Camera extends GameObject {
 			right = 1.0;
 		}
 
-		// TODO: Determine how to calculate this.
+		// TODO: The near-plane is too close for this.
 		gl.glFrustum(left, right, bottom, top, 1 / Math.tan(Math.toRadians(fov / 2)), farPlane);
 	}
 }

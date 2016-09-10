@@ -6,9 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JFrame;
 
-import ass2.game.Camera;
-import ass2.game.GameObject;
-import ass2.game.Updatable;
+import ass2.game.*;
 import ass2.math.Vector3;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLJPanel;
@@ -40,20 +38,22 @@ public class Game extends JFrame implements GLEventListener {
 	 *
 	 */
 	public void run() {
-		  GLProfile glp = GLProfile.getDefault();
-		  GLCapabilities caps = new GLCapabilities(glp);
-		  GLJPanel panel = new GLJPanel();
-		  panel.addGLEventListener(this);
+		GLProfile glp = GLProfile.getDefault();
+		GLCapabilities caps = new GLCapabilities(glp);
+		GLJPanel panel = new GLJPanel();
+		panel.addGLEventListener(this);
  
-		  // Add an animator to call 'display' at 60fps
-		  FPSAnimator animator = new FPSAnimator(60);
-		  animator.add(panel);
-		  animator.start();
+		// Add an animator to call 'display' at 60fps
+		FPSAnimator animator = new FPSAnimator(60);
+		animator.add(panel);
+		animator.start();
 
-		  getContentPane().add(panel);
-		  setSize(800, 600);
-		  setVisible(true);
-		  setDefaultCloseOperation(EXIT_ON_CLOSE);
+		getContentPane().add(panel);
+		setSize(800, 600);
+		setVisible(true);
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+		panel.addKeyListener(new Input());
 	}
 
 	/**
@@ -65,9 +65,10 @@ public class Game extends JFrame implements GLEventListener {
 	public static void main(String[] args) throws FileNotFoundException {
 		Terrain terrain = LevelIO.load(new File(args[0]));
 		Game game = new Game(terrain);
-		game.currentCamera = new Camera(GameObject.ROOT);
-		game.currentCamera.transform.position = new Vector3(5.0, 3.0, 10.0);
-		game.currentCamera.transform.rotation = new Vector3(0.0, 0.0, 0.0);
+		PlayerController player = new PlayerController(GameObject.ROOT);
+		game.currentCamera = new Camera(player);
+		player.transform.position = new Vector3(5.0, 3.0, 10.0);
+		player.transform.rotation = new Vector3(0.0, 0.0, 0.0);
 		game.run();
 	}
 
@@ -80,6 +81,9 @@ public class Game extends JFrame implements GLEventListener {
 		long time = System.currentTimeMillis();
 		double dt = (time - myTime) / 1000.0;
 		myTime = time;
+
+		// Update the input.
+		Input.updateKeyboardState();
 
 		GameObject.ROOT.tryUpdate(dt);
 	}
