@@ -1,4 +1,0 @@
-Manifest-Version: 1.0
-Class-Path: lib/jogl-all.jar lib/gluegen-rt.jar lib/joal.jar lib/jocl.jar;
-Main-Class: ass2.spec.Game
-
