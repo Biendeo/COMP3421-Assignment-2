@@ -1,7 +1,5 @@
 package ass2.game;
 
-import javafx.scene.input.KeyCode;
-
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -21,24 +19,24 @@ public class Input implements KeyListener {
 		futureKeyboardState = currentKeyboardState.clone();
 	}
 
-	public static boolean getKeyDown(KeyCode key) {
-		if (!previousKeyboardState[key.ordinal()] && currentKeyboardState[key.ordinal()]) {
+	public static boolean getKeyDown(int key) {
+		if (!previousKeyboardState[key] && currentKeyboardState[key]) {
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	public static boolean getKeyUp(KeyCode key) {
-		if (previousKeyboardState[key.ordinal()] && !currentKeyboardState[key.ordinal()]) {
+	public static boolean getKeyUp(int key) {
+		if (previousKeyboardState[key] && !currentKeyboardState[key]) {
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	public static boolean getKey(KeyCode key) {
-		if (currentKeyboardState[key.ordinal()]) {
+	public static boolean getKey(int key) {
+		if (currentKeyboardState[key]) {
 			return true;
 		} else {
 			return false;
@@ -52,11 +50,11 @@ public class Input implements KeyListener {
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		futureKeyboardState[KeyCode.getKeyCode(KeyEvent.getKeyText(e.getKeyCode())).ordinal()] = true;
+		futureKeyboardState[e.getKeyCode()] = true;
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-		futureKeyboardState[KeyCode.getKeyCode(KeyEvent.getKeyText(e.getKeyCode())).ordinal()] = false;
+		futureKeyboardState[e.getKeyCode()] = false;
 	}
 }
