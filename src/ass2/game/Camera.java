@@ -82,6 +82,6 @@ public class Camera extends GameObject {
 		}
 
 		// TODO: The near-plane is too close for this.
-		gl.glFrustum(left, right, bottom, top, 1 / Math.tan(Math.toRadians(fov / 2)), farPlane);
+		gl.glFrustum(left / 10, right / 10, bottom / 10, top / 10, 0.1 / Math.tan(Math.toRadians(fov / 2)), farPlane);
 	}
 }
