@@ -105,14 +105,12 @@ public class Game extends JFrame implements GLEventListener {
 
 	@Override
 	public void dispose(GLAutoDrawable drawable) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void init(GLAutoDrawable drawable) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override

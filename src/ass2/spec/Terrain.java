@@ -191,12 +191,10 @@ public class Terrain extends GameObject implements Drawable {
 		for (int x = 0; x < mySize.width - 1; ++x) {
 			for (int z = 0; z < mySize.height - 1; ++z) {
 				gl.glColor3d(1.0, 1.0, 1.0);
-				gl.glBegin(GL2.GL_LINE_LOOP);
+				gl.glBegin(GL2.GL_TRIANGLES);
 				gl.glVertex3d(x, altitude(x, z), z);
 				gl.glVertex3d(x + 1, altitude(x + 1, z), z);
 				gl.glVertex3d(x, altitude(x, z + 1), z + 1);
-				gl.glEnd();
-				gl.glBegin(GL2.GL_LINE_LOOP);
 				gl.glVertex3d(x + 1, altitude(x + 1, z), z);
 				gl.glVertex3d(x, altitude(x, z + 1), z + 1);
 				gl.glVertex3d(x + 1, altitude(x + 1, z + 1), z + 1);
