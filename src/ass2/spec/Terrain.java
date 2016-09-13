@@ -13,6 +13,7 @@ import java.util.List;
 import ass2.game.Drawable;
 import ass2.game.GameObject;
 import ass2.math.Vector3;
+import ass2.math.Vector3f;
 import com.jogamp.opengl.GL2;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -30,21 +31,21 @@ public class Terrain extends GameObject implements Drawable {
 	private double[][] myAltitude;
 	private List<Tree> myTrees;
 	private List<Road> myRoads;
-	private Vector3 mySunlight;
-
+	private Vector3f mySunlight;
 	/**
 	 * Create a new terrain
 	 *
 	 * @param width The number of vertices in the x-direction
 	 * @param depth The number of vertices in the z-direction
 	 */
+
 	public Terrain(int width, int depth) {
 		super(GameObject.ROOT);
 		mySize = new Dimension(width, depth);
 		myAltitude = new double[width][depth];
 		myTrees = new ArrayList<Tree>();
 		myRoads = new ArrayList<Road>();
-		mySunlight = new Vector3();
+		mySunlight = new Vector3f();
 	}
 
 	public Terrain(Dimension size) {
@@ -63,7 +64,7 @@ public class Terrain extends GameObject implements Drawable {
 		return myRoads;
 	}
 
-	public Vector3 getSunlight() {
+	public Vector3f getSunlight() {
 		return mySunlight;
 	}
 
@@ -76,13 +77,13 @@ public class Terrain extends GameObject implements Drawable {
 	 * @param dy
 	 * @param dz
 	 */
-	public void setSunlightDir(double dx, double dy, double dz) {
+	public void setSunlightDir(float dx, float dy, float dz) {
 		mySunlight.x = dx;
 		mySunlight.y = dy;
 		mySunlight.z = dz;
 	}
 
-	public void setSunlightDir(Vector3 delta) {
+	public void setSunlightDir(Vector3f delta) {
 		mySunlight = delta.clone();
 	}
 

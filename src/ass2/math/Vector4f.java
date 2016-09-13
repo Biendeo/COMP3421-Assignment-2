@@ -1,35 +1,35 @@
 package ass2.math;
 
 /**
- * This class just stores four doubles in a single object. It can be used to store four data fields easily such as colours or quaternion rotation values.
+ * This class just stores four floats in a single object. It can be used to store four data fields easily such as colours or quaternion rotation values.
  * 
- * The usage of it is similar to other Vector4 classes in engines such as the Unity Engine, but
+ * The usage of it is similar to other Vector4f classes in engines such as the Unity Engine, but
  * all this code is original.
  * 
  * @author Thomas Moffet, z5061905
  *
  */
-public class Vector4 {
-	public double x;
-	public double y;
-	public double z;
-	public double w;
+public class Vector4f {
+	public float x;
+	public float y;
+	public float z;
+	public float w;
 
 	/**
-	 * Constructs a Vector4 defaulting to (0.0, 0.0, 0.0, 0.0).
+	 * Constructs a Vector4f defaulting to (0.0, 0.0, 0.0, 0.0).
 	 */
-	public Vector4() {
-		this(0.0, 0.0, 0.0, 0.0);
+	public Vector4f() {
+		this(0.0f, 0.0f, 0.0f, 0.0f);
 	}
 
 	/**
-	 * Constructs a Vector4 in the form of (x, y, z, w).
+	 * Constructs a Vector4f in the form of (x, y, z, w).
 	 * @param x
 	 * @param y
 	 * @param z
 	 * @param w
 	 */
-	public Vector4(double x, double y, double z, double w) {
+	public Vector4f(float x, float y, float z, float w) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
@@ -37,10 +37,10 @@ public class Vector4 {
 	}
 	
 	/**
-	 * Creates a new Vector4 with the same values.
+	 * Creates a new Vector4f with the same values.
 	 */
-	public Vector4 clone() {
-		Vector4 returnVector = new Vector4();
+	public Vector4f clone() {
+		Vector4f returnVector = new Vector4f();
 		returnVector.x = x;
 		returnVector.y = y;
 		returnVector.z = z;
@@ -50,33 +50,33 @@ public class Vector4 {
 	}
 	
 	/**
-	 * Checks for equality between two Vector4 objects.
+	 * Checks for equality between two Vector4f objects.
 	 */
 	public boolean equals(Object o) {
 		if (o == null || o.getClass() != this.getClass()) {
 			return false;
 		} else {
-			Vector4 v = (Vector4)o;
+			Vector4f v = (Vector4f)o;
 			return (v.x == x && v.y == y && v.z == z && v.w == w);
 		}
 	}
 	
 	/**
-	 * Adds the properties of a Vector4 to this one (the + operator).
+	 * Adds the properties of a Vector4f to this one (the + operator).
 	 * @param v
 	 * @return
 	 */
-	public Vector4 add(Vector4 v) {
+	public Vector4f add(Vector4f v) {
 		return add(this, v);
 	}
 
 	/**
-	 * Adds the properties of a Vector4 to this one in place (the += operator).
+	 * Adds the properties of a Vector4f to this one in place (the += operator).
 	 * @param v
 	 * @return This object.
 	 */
-	public Vector4 addSelf(Vector4 v) {
-		Vector4 a = add(this, v);
+	public Vector4f addSelf(Vector4f v) {
+		Vector4f a = add(this, v);
 		x = a.x;
 		y = a.y;
 		z = a.z;
@@ -86,13 +86,13 @@ public class Vector4 {
 	}
 	
 	/**
-	 * Adds the properties of a Vector4 to this one (the + operator).
+	 * Adds the properties of a Vector4f to this one (the + operator).
 	 * @param left
 	 * @param right
 	 * @return
 	 */
-	public static Vector4 add(Vector4 left, Vector4 right) {
-		Vector4 returnVector = new Vector4();
+	public static Vector4f add(Vector4f left, Vector4f right) {
+		Vector4f returnVector = new Vector4f();
 		returnVector.x = left.x + right.x;
 		returnVector.y = left.y + right.y;
 		returnVector.z = left.z + right.z;
@@ -102,21 +102,21 @@ public class Vector4 {
 	}
 	
 	/**
-	 * Subtracts the properties of a Vector4 from this one (the - operator).
+	 * Subtracts the properties of a Vector4f from this one (the - operator).
 	 * @param v
 	 * @return
 	 */
-	public Vector4 subtract(Vector4 v) {
+	public Vector4f subtract(Vector4f v) {
 		return subtract(this, v);
 	}
 	
 	/**
-	 * Subtracts the properties of a Vector4 from this one in place (the -= operator).
+	 * Subtracts the properties of a Vector4f from this one in place (the -= operator).
 	 * @param v
 	 * @return This object.
 	 */
-	public Vector4 subtractSelf(Vector4 v) {
-		Vector4 a = subtract(this, v);
+	public Vector4f subtractSelf(Vector4f v) {
+		Vector4f a = subtract(this, v);
 		x = a.x;
 		y = a.y;
 		z = a.z;
@@ -126,13 +126,13 @@ public class Vector4 {
 	}
 	
 	/**
-	 * Subtracts the properties of a Vector4 from this one (the - operator).
+	 * Subtracts the properties of a Vector4f from this one (the - operator).
 	 * @param left
 	 * @param right
 	 * @return
 	 */
-	public static Vector4 subtract(Vector4 left, Vector4 right) {
-		Vector4 returnVector = new Vector4();
+	public static Vector4f subtract(Vector4f left, Vector4f right) {
+		Vector4f returnVector = new Vector4f();
 		returnVector.x = left.x - right.x;
 		returnVector.y = left.y - right.y;
 		returnVector.z = left.z - right.z;
@@ -146,7 +146,7 @@ public class Vector4 {
 	 * @param s
 	 * @return
 	 */
-	public Vector4 multiply(double s) {
+	public Vector4f multiply(float s) {
 		return multiply(this, s);
 	}
 	
@@ -155,8 +155,8 @@ public class Vector4 {
 	 * @param s
 	 * @return This object.
 	 */
-	public Vector4 multiplySelf(double s) {
-		Vector4 a = multiply(this, s);
+	public Vector4f multiplySelf(float s) {
+		Vector4f a = multiply(this, s);
 		x = a.x;
 		y = a.y;
 		z = a.z;
@@ -171,8 +171,8 @@ public class Vector4 {
 	 * @param right
 	 * @return
 	 */
-	public static Vector4 multiply(Vector4 left, double right) {
-		Vector4 returnVector = new Vector4();
+	public static Vector4f multiply(Vector4f left, float right) {
+		Vector4f returnVector = new Vector4f();
 		returnVector.x = left.x * right;
 		returnVector.y = left.y * right;
 		returnVector.z = left.z * right;
@@ -186,7 +186,7 @@ public class Vector4 {
 	 * @param v
 	 * @return
 	 */
-	public Vector4 multiply(Vector4 v) {
+	public Vector4f multiply(Vector4f v) {
 		return multiply(this, v);
 	}
 
@@ -195,8 +195,8 @@ public class Vector4 {
 	 * @param v
 	 * @return This object.
 	 */
-	public Vector4 multiplySelf(Vector4 v) {
-		Vector4 a = multiply(this, v);
+	public Vector4f multiplySelf(Vector4f v) {
+		Vector4f a = multiply(this, v);
 		x = a.x;
 		y = a.y;
 		z = a.z;
@@ -211,8 +211,8 @@ public class Vector4 {
 	 * @param right
 	 * @return
 	 */
-	public static Vector4 multiply(Vector4 left, Vector4 right) {
-		Vector4 returnVector = new Vector4();
+	public static Vector4f multiply(Vector4f left, Vector4f right) {
+		Vector4f returnVector = new Vector4f();
 		returnVector.x = left.x * right.x;
 		returnVector.y = left.y * right.y;
 		returnVector.z = left.z * right.z;
@@ -226,7 +226,7 @@ public class Vector4 {
 	 * @param s
 	 * @return
 	 */
-	public Vector4 divide(double s) {
+	public Vector4f divide(float s) {
 		return divide(this, s);
 	}
 	
@@ -235,8 +235,8 @@ public class Vector4 {
 	 * @param s
 	 * @return This object.
 	 */
-	public Vector4 divideSelf(double s) {
-		Vector4 a = divide(this, s);
+	public Vector4f divideSelf(float s) {
+		Vector4f a = divide(this, s);
 		x = a.x;
 		y = a.y;
 		z = a.z;
@@ -251,8 +251,8 @@ public class Vector4 {
 	 * @param right
 	 * @return
 	 */
-	public static Vector4 divide(Vector4 left, double right) {
-		Vector4 returnVector = new Vector4();
+	public static Vector4f divide(Vector4f left, float right) {
+		Vector4f returnVector = new Vector4f();
 		returnVector.x = left.x / right;
 		returnVector.y = left.y / right;
 		returnVector.z = left.z / right;
@@ -266,7 +266,7 @@ public class Vector4 {
 	 * @param v
 	 * @return
 	 */
-	public Vector4 divide(Vector4 v) {
+	public Vector4f divide(Vector4f v) {
 		return divide(this, v);
 	}
 
@@ -275,8 +275,8 @@ public class Vector4 {
 	 * @param v
 	 * @return This object.
 	 */
-	public Vector4 divideSelf(Vector4 v) {
-		Vector4 a = divide(this, v);
+	public Vector4f divideSelf(Vector4f v) {
+		Vector4f a = divide(this, v);
 		x = a.x;
 		y = a.y;
 		z = a.z;
@@ -291,8 +291,8 @@ public class Vector4 {
 	 * @param right
 	 * @return
 	 */
-	public static Vector4 divide(Vector4 left, Vector4 right) {
-		Vector4 returnVector = new Vector4();
+	public static Vector4f divide(Vector4f left, Vector4f right) {
+		Vector4f returnVector = new Vector4f();
 		returnVector.x = left.x / right.x;
 		returnVector.y = left.y / right.y;
 		returnVector.z = left.z / right.z;
@@ -302,21 +302,21 @@ public class Vector4 {
 	}
 	
 	/**
-	 * Returns the Vector4 where each property is the reciprocal of itself (similar to a ^-1 operator).
+	 * Returns the Vector4f where each property is the reciprocal of itself (similar to a ^-1 operator).
 	 * 
 	 * @return
 	 */
-	public Vector4 invert() {
+	public Vector4f invert() {
 		return invert(this);
 	}
 	
 	/**
-	 * In places the Vector4 where each property is the reciprocal of itself (similar to a ^-1 operator).
+	 * In places the Vector4f where each property is the reciprocal of itself (similar to a ^-1 operator).
 	 * 
 	 * @return This object.
 	 */
-	public Vector4 invertSelf() {
-		Vector4 a  = invert(this);
+	public Vector4f invertSelf() {
+		Vector4f a  = invert(this);
 		x = a.x;
 		y = a.y;
 		z = a.z;
@@ -326,13 +326,13 @@ public class Vector4 {
 	}
 	
 	/**
-	 * Returns the Vector4 where each property is the reciprocal of itself (similar to a ^-1 operator).
+	 * Returns the Vector3 where each property is the reciprocal of itself (similar to a ^-1 operator).
 	 * 
 	 * @param term
 	 * @return
 	 */
-	public static Vector4 invert(Vector4 term) {
-		return divide(new Vector4(1.0, 1.0, 1.0, 1.0), term);
+	public static Vector4f invert(Vector4f term) {
+		return divide(new Vector4f(1.0f, 1.0f, 1.0f, 1.0f), term);
 	}
 	
 	/**

@@ -2,13 +2,14 @@ package ass2.game;
 
 import ass2.math.Vector3;
 import ass2.math.Vector4;
+import ass2.math.Vector4f;
 import com.jogamp.opengl.GL2;
 
 /**
  * Handles viewing the world.
  */
 public class Camera extends GameObject {
-	private Vector4 clearColor;
+	private Vector4f clearColor;
 
 	private double nearPlane;
 	private double farPlane;
@@ -16,7 +17,7 @@ public class Camera extends GameObject {
 
 	public Camera(GameObject parent) {
 		super(parent);
-		clearColor = new Vector4(0.5, 0.5, 0.9, 1.0);
+		clearColor = new Vector4f(0.5f, 0.5f, 0.9f, 1.0f);
 		nearPlane = 0.1;
 		farPlane = 1000.0;
 		fov = 85.0;
@@ -32,7 +33,7 @@ public class Camera extends GameObject {
 	 */
 	public void setView(GL2 gl) {
 		// This is mostly copied from my assignment 1.
-		gl.glClearColor((float)clearColor.x, (float)clearColor.y, (float)clearColor.z, (float)clearColor.w);
+		gl.glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
 
 		// This enables lighting.
 		/*
