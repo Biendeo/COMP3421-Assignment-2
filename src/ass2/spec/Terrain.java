@@ -169,7 +169,7 @@ public class Terrain extends GameObject implements Drawable {
 	 */
 	public void addTree(double x, double z) {
 		double y = altitude(x, z);
-		Tree tree = new Tree(x, y, z);
+		Tree tree = new Tree(this, x, y, z);
 		myTrees.add(tree);
 	}
 

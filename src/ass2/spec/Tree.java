@@ -18,8 +18,8 @@ public class Tree extends GameObject implements Drawable {
 	 * @param y The y co-ord.
 	 * @param z The z co-ord.
 	 */
-	public Tree(double x, double y, double z) {
-		super(GameObject.ROOT);
+	public Tree(GameObject parent, double x, double y, double z) {
+		super(parent);
 		this.transform.position = new Vector3(x, y, z);
 	}
 
@@ -27,8 +27,8 @@ public class Tree extends GameObject implements Drawable {
 	 * Constructs a new tree at the given position.
 	 * @param position The position of the tree.
 	 */
-	public Tree(Vector3 position) {
-		super(GameObject.ROOT);
+	public Tree(GameObject parent, Vector3 position) {
+		super(parent);
 		this.transform.position = position.clone();
 	}
 
