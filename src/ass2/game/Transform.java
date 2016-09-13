@@ -7,7 +7,6 @@ import ass2.math.Vector3;
  */
 public class Transform {
 	public Vector3 position;
-	// TODO: Convert this to a quaternion later.
 	public Vector3 rotation;
 	public Vector3 scale;
 
