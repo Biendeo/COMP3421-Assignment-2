@@ -12,6 +12,7 @@ import java.util.List;
 
 import ass2.game.Drawable;
 import ass2.game.GameObject;
+import ass2.math.Vector3;
 import com.jogamp.opengl.GL2;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -29,7 +30,7 @@ public class Terrain extends GameObject implements Drawable {
 	private double[][] myAltitude;
 	private List<Tree> myTrees;
 	private List<Road> myRoads;
-	private float[] mySunlight;
+	private Vector3 mySunlight;
 
 	/**
 	 * Create a new terrain
@@ -43,7 +44,7 @@ public class Terrain extends GameObject implements Drawable {
 		myAltitude = new double[width][depth];
 		myTrees = new ArrayList<Tree>();
 		myRoads = new ArrayList<Road>();
-		mySunlight = new float[3];
+		mySunlight = new Vector3();
 	}
 
 	public Terrain(Dimension size) {
@@ -62,7 +63,7 @@ public class Terrain extends GameObject implements Drawable {
 		return myRoads;
 	}
 
-	public float[] getSunlight() {
+	public Vector3 getSunlight() {
 		return mySunlight;
 	}
 
@@ -71,16 +72,18 @@ public class Terrain extends GameObject implements Drawable {
 	 *
 	 * Note: the sun should be treated as a directional light, without a position
 	 *
-	 * // TODO: Replace this with a Vector3f.
-	 *
 	 * @param dx
 	 * @param dy
 	 * @param dz
 	 */
-	public void setSunlightDir(float dx, float dy, float dz) {
-		mySunlight[0] = dx;
-		mySunlight[1] = dy;
-		mySunlight[2] = dz;
+	public void setSunlightDir(double dx, double dy, double dz) {
+		mySunlight.x = dx;
+		mySunlight.y = dy;
+		mySunlight.z = dz;
+	}
+
+	public void setSunlightDir(Vector3 delta) {
+		mySunlight = delta.clone();
 	}
 
 
@@ -191,10 +194,14 @@ public class Terrain extends GameObject implements Drawable {
 		for (int x = 0; x < mySize.width - 1; ++x) {
 			for (int z = 0; z < mySize.height - 1; ++z) {
 				gl.glColor3d(1.0, 1.0, 1.0);
-				gl.glBegin(GL2.GL_TRIANGLES);
+				gl.glBegin(GL2.GL_LINE_LOOP);
+				// When rendering lights, use this instead.
+				//gl.glBegin(GL2.GL_TRIANGLES);
 				gl.glVertex3d(x, altitude(x, z), z);
 				gl.glVertex3d(x + 1, altitude(x + 1, z), z);
 				gl.glVertex3d(x, altitude(x, z + 1), z + 1);
+				gl.glEnd();
+				gl.glBegin(GL2.GL_LINE_LOOP);
 				gl.glVertex3d(x + 1, altitude(x + 1, z), z);
 				gl.glVertex3d(x, altitude(x, z + 1), z + 1);
 				gl.glVertex3d(x + 1, altitude(x + 1, z + 1), z + 1);
