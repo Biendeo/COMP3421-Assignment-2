@@ -226,22 +226,14 @@ public class Terrain extends GameObject implements Drawable {
 				Vector3 topRightCross = bottomRight.subtract(topRight).cross(topLeft.subtract(topRight));
 				topRightCross.divideSelf(topRightCross.modulus());
 
-				//gl.glBegin(GL2.GL_LINE_LOOP);
-				// When rendering lights, use this instead.
 				gl.glBegin(GL2.GL_TRIANGLES);
 				gl.glNormal3d(bottomLeftCross.x, bottomLeftCross.y, bottomLeftCross.z);
 				gl.glVertex3d(x, altitude(x, z), z);
-				gl.glNormal3d(bottomLeftCross.x, bottomLeftCross.y, bottomLeftCross.z);
 				gl.glVertex3d(x + 1, altitude(x + 1, z), z);
-				gl.glNormal3d(bottomLeftCross.x, bottomLeftCross.y, bottomLeftCross.z);
-				gl.glVertex3d(x, altitude(x, z + 1), z + 1);
-				//gl.glEnd();
-				//gl.glBegin(GL2.GL_LINE_LOOP);
-				gl.glNormal3d(topRightCross.x, topRightCross.y, topRightCross.z);
-				gl.glVertex3d(x + 1, altitude(x + 1, z), z);
-				gl.glNormal3d(topRightCross.x, topRightCross.y, topRightCross.z);
 				gl.glVertex3d(x, altitude(x, z + 1), z + 1);
 				gl.glNormal3d(topRightCross.x, topRightCross.y, topRightCross.z);
+				gl.glVertex3d(x + 1, altitude(x + 1, z), z);
+				gl.glVertex3d(x, altitude(x, z + 1), z + 1);
 				gl.glVertex3d(x + 1, altitude(x + 1, z + 1), z + 1);
 				gl.glEnd();
 
