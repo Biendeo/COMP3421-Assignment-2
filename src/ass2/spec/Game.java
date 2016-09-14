@@ -36,7 +36,7 @@ public class Game extends JFrame implements GLEventListener {
 
 		Light mainLight = new Light(GameObject.ROOT, GL2.GL_LIGHT0, LightType.POINT);
 		mainLight.material.diffuse = new Vector4f(0.8f, 0.8f, 0.8f, 1.0f);
-		mainLight.transform.position = new Vector3(5.0, 4.5, 5.0);
+		mainLight.transform.position = new Vector3(5.0, 8.0, -5.0);
 		lights.add(mainLight);
 
 	}
@@ -101,10 +101,6 @@ public class Game extends JFrame implements GLEventListener {
 	public void display(GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
 
-		// Set up the lighting.
-		for (Light l : lights) {
-			l.setLight(gl);
-		}
 
 		// set the view matrix based on the camera position
 		currentCamera.setView(gl);
@@ -113,6 +109,10 @@ public class Game extends JFrame implements GLEventListener {
 		update();
 
 		// draw the scene tree
+		// Set up the lighting.
+		for (Light l : lights) {
+			l.setLight(gl);
+		}
 		GameObject.ROOT.tryDraw(gl);
 		
 	}

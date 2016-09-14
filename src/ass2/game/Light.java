@@ -2,6 +2,7 @@ package ass2.game;
 
 import ass2.math.Vector3;
 import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.util.gl2.GLUT;
 
 public class Light extends GameObject {
 	public Material material;
@@ -18,6 +19,10 @@ public class Light extends GameObject {
 
 	public void setLight(GL2 gl) {
 		if (enabled) {
+			int lightType = 0;
+			if (type == LightType.DIRECTIONAL) {
+				lightType = 1;
+			}
 			// This is copied from the week 6 code.
 			// rotate the light
 			gl.glMatrixMode(GL2.GL_MODELVIEW);
@@ -32,23 +37,33 @@ public class Light extends GameObject {
 			Vector3 globalRotation = getGlobalRotationVector();
 			Vector3 globalScale = getGlobalScaleVector();
 
+
 			gl.glScaled(globalScale.x, globalScale.y, globalScale.z);
 			gl.glRotated(globalRotation.x, 1.0, 0.0, 0.0);
 			gl.glRotated(globalRotation.y, 0.0, 1.0, 0.0);
 			gl.glRotated(globalRotation.z, 0.0, 0.0, 1.0);
 
+
 			float[] pos = new float[]{(float) globalPosition.x, (float) globalPosition.y, (float) globalPosition.z};
-			gl.glLightfv(lightNumber, GL2.GL_POSITION, pos, 0);
+			gl.glLightfv(lightNumber, GL2.GL_POSITION, pos, lightType);
 			gl.glPopMatrix();
 
+			gl.glPushMatrix();
+			gl.glTranslated(globalPosition.x, globalPosition.y, globalPosition.z);
+
 			float[] ambient = new float[]{material.ambient.x, material.ambient.y, material.ambient.z};
-			gl.glLightfv(lightNumber, GL2.GL_AMBIENT, ambient, 0);
+			gl.glLightfv(lightNumber, GL2.GL_AMBIENT, ambient, lightType);
 
 			float[] diffuse = new float[]{material.diffuse.x, material.diffuse.y, material.diffuse.z};
-			gl.glLightfv(lightNumber, GL2.GL_DIFFUSE, diffuse, 0);
+			gl.glLightfv(lightNumber, GL2.GL_DIFFUSE, diffuse, lightType);
 
 			float[] specular = new float[]{material.specular.x, material.specular.y, material.specular.z};
-			gl.glLightfv(lightNumber, GL2.GL_SPECULAR, specular, 0);
+			gl.glLightfv(lightNumber, GL2.GL_SPECULAR, specular, lightType);
+
+			GLUT glut = new GLUT();
+			// Just to test that the light exists in space.
+			glut.glutSolidSphere(0.5, 10, 10);
+			gl.glPopMatrix();
 		} else {
 			gl.glDisable(lightNumber);
 		}
