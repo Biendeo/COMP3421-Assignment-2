@@ -8,6 +8,7 @@ import javax.swing.JFrame;
 
 import ass2.game.*;
 import ass2.math.Vector3;
+import ass2.math.Vector4f;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLJPanel;
 import com.jogamp.opengl.util.FPSAnimator;
@@ -25,12 +26,19 @@ public class Game extends JFrame implements GLEventListener {
 
 	private Terrain myTerrain;
 	private Camera currentCamera;
+	private List<Light> lights;
 
 	public Game(Terrain terrain) {
 		super("Assignment 2");
 		myTime = 0L;
 		myTerrain = terrain;
-   
+		lights = new ArrayList<Light>();
+
+		Light mainLight = new Light(GameObject.ROOT, GL2.GL_LIGHT0, LightType.POINT);
+		mainLight.material.diffuse = new Vector4f(0.8f, 0.8f, 0.8f, 1.0f);
+		mainLight.transform.position = new Vector3(5.0, 4.5, 5.0);
+		lights.add(mainLight);
+
 	}
 
 	/**
@@ -69,6 +77,7 @@ public class Game extends JFrame implements GLEventListener {
 		game.currentCamera = new Camera(player);
 		player.transform.position = new Vector3(5.0, 3.0, 10.0);
 		player.transform.rotation = new Vector3(0.0, 0.0, 0.0);
+
 		game.run();
 	}
 
@@ -91,6 +100,11 @@ public class Game extends JFrame implements GLEventListener {
 	@Override
 	public void display(GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
+
+		// Set up the lighting.
+		for (Light l : lights) {
+			l.setLight(gl);
+		}
 
 		// set the view matrix based on the camera position
 		currentCamera.setView(gl);

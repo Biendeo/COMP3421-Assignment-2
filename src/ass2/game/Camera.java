@@ -35,12 +35,6 @@ public class Camera extends GameObject {
 		// This is mostly copied from my assignment 1.
 		gl.glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
 
-		// This enables lighting.
-		/*
-		gl.glEnable(GL2.GL_LIGHTING);
-		gl.glEnable(GL2.GL_LIGHT0);
-		gl.glEnable(GL2.GL_NORMALIZE);
-		*/
 		gl.glEnable(GL2.GL_DEPTH_TEST);
 		gl.glClearDepth(farPlane);
 		gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);

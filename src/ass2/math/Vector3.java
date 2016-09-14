@@ -329,6 +329,28 @@ public class Vector3 {
 	public static Vector3 invert(Vector3 term) {
 		return divide(new Vector3(1.0, 1.0, 1.0), term);
 	}
+
+	public Vector3 cross(Vector3 v) {
+		return cross(this, v);
+	}
+
+	public Vector3 crossSelf(Vector3 v) {
+		Vector3 a = cross(this, v);
+		x = a.x;
+		y = a.y;
+		z = a.z;
+
+		return this;
+	}
+
+	public static Vector3 cross(Vector3 left, Vector3 right) {
+		Vector3 returnVector = new Vector3();
+		returnVector.x = left.y * right.z - right.y * left.z;
+		returnVector.y = left.z * right.x - right.z * left.x;
+		returnVector.z = left.x * right.y - right.x * left.y;
+
+		return returnVector;
+	}
 	
 	/**
 	 * Computes the overall distance achieved by this vector.
