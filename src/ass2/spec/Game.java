@@ -37,6 +37,7 @@ public class Game extends JFrame implements GLEventListener {
 
 		Light mainLight = new Light(GameObject.ROOT, GL2.GL_LIGHT0, LightType.DIRECTIONAL);
 		mainLight.material.diffuse = new Vector4f(0.8f, 0.8f, 0.8f, 1.0f);
+		mainLight.material.specular = new Vector4f(0.8f, 0.8f, 0.8f, 1.0f);
 		// When this is a directional light, this value does nothing.
 		mainLight.transform.position = new Vector3(5.0, 8.0, -5.0);
 		Vector3f sunlightDirection = terrain.getSunlight();
