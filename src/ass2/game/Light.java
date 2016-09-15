@@ -19,6 +19,12 @@ public class Light extends GameObject implements Updatable, Drawable {
 	// This is purely for debugging.
 	private boolean visibleModel;
 
+	/**
+	 * Constructs a new light in the scene.
+	 * @param parent The parent GameObject.
+	 * @param lightNumber The light number (this should be GL2.GL_LIGHT0 or similar).
+	 * @param type The type of light (point, directional, spot).
+	 */
 	public Light(GameObject parent, int lightNumber, LightType type) {
 		super(parent);
 		material = new Material();
@@ -27,7 +33,11 @@ public class Light extends GameObject implements Updatable, Drawable {
 		this.visibleModel = true;
 	}
 
-	public void setLight(GL2 gl, Camera camera) {
+	/**
+	 * Establishes the light in the world and applies its light properties.
+	 * @param gl The GL object.
+	 */
+	public void setLight(GL2 gl) {
 		if (enabled) {
 			int lightType = 1;
 			if (type == LightType.DIRECTIONAL) {
@@ -35,33 +45,30 @@ public class Light extends GameObject implements Updatable, Drawable {
 			}
 			// This is copied from the week 6 code.
 			// rotate the light
-			gl.glMatrixMode(GL2.GL_MODELVIEW);
+			//gl.glMatrixMode(GL2.GL_MODELVIEW);
 			gl.glEnable(GL2.GL_LIGHTING);
 			gl.glEnable(lightNumber);
 			gl.glEnable(GL2.GL_NORMALIZE);
 
 			float[] ambient = new float[]{material.ambient.x, material.ambient.y, material.ambient.z};
-			gl.glLightfv(lightNumber, GL2.GL_AMBIENT, ambient, lightType);
+			gl.glLightfv(lightNumber, GL2.GL_AMBIENT, ambient, 0);
 
 			float[] diffuse = new float[]{material.diffuse.x, material.diffuse.y, material.diffuse.z};
-			gl.glLightfv(lightNumber, GL2.GL_DIFFUSE, diffuse, lightType);
+			gl.glLightfv(lightNumber, GL2.GL_DIFFUSE, diffuse, 0);
 
 			float[] specular = new float[]{material.specular.x, material.specular.y, material.specular.z};
-			gl.glLightfv(lightNumber, GL2.GL_SPECULAR, specular, lightType);
+			gl.glLightfv(lightNumber, GL2.GL_SPECULAR, specular, 0);
 
-
-			gl.glPushMatrix();
 
 			Vector3 lightVector = new Vector3();
 			if (type == LightType.POINT) {
-				lightVector = transform.position.clone();
+				lightVector = getGlobalPositionVector();
 			} else if (type == LightType.DIRECTIONAL) {
-				lightVector = transform.rotation.clone();
+				lightVector = getGlobalRotationVector();
 			}
 
 			float[] pos = new float[]{(float)lightVector.x, (float)lightVector.y, (float)lightVector.z, lightType};
 			gl.glLightfv(lightNumber, GL2.GL_POSITION, pos, 0);
-			gl.glPopMatrix();
 
 		} else {
 			gl.glDisable(lightNumber);

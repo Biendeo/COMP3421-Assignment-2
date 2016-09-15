@@ -4,10 +4,17 @@ import ass2.math.Vector3;
 
 import java.awt.event.KeyEvent;
 
+/**
+ * Handles the player character's input and appearance.
+ */
 public class PlayerController extends GameObject implements Updatable {
 	private double movementSpeed = 6.0;
 	private double turnSpeed = 120.0;
 
+	/**
+	 * Constructs a player.
+	 * @param parent The parent GameObject.
+	 */
 	public PlayerController(GameObject parent) {
 		super(parent);
 	}

@@ -11,6 +11,9 @@ public class Material {
 	public Vector4f specular;
 	public Vector4f phong;
 
+	/**
+	 * Constructs a material with default 0 properties.
+	 */
 	public Material() {
 		ambient = new Vector4f();
 		diffuse = new Vector4f();
