@@ -13,12 +13,12 @@ public class GameObject {
 	public static final ArrayList<GameObject> ALL_OBJECTS = new ArrayList<GameObject>();
 	public static final GameObject ROOT = new GameObject(null);
 
-	private GameObject parent;
-	private ArrayList<GameObject> children;
+	protected GameObject parent;
+	protected ArrayList<GameObject> children;
 
 	public Transform transform;
 
-	private boolean enabled;
+	protected boolean enabled;
 
 
 	/**

@@ -12,7 +12,13 @@ import java.util.List;
 
 import ass2.game.Drawable;
 import ass2.game.GameObject;
+import ass2.game.Material;
+import ass2.math.Vector3;
+import ass2.math.Vector3f;
+import ass2.math.Vector4f;
+import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.util.gl2.GLUT;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -29,21 +35,28 @@ public class Terrain extends GameObject implements Drawable {
 	private double[][] myAltitude;
 	private List<Tree> myTrees;
 	private List<Road> myRoads;
-	private float[] mySunlight;
-
+	private Vector3f mySunlight;
+	private Material material;
 	/**
 	 * Create a new terrain
 	 *
 	 * @param width The number of vertices in the x-direction
 	 * @param depth The number of vertices in the z-direction
 	 */
+
 	public Terrain(int width, int depth) {
 		super(GameObject.ROOT);
 		mySize = new Dimension(width, depth);
 		myAltitude = new double[width][depth];
 		myTrees = new ArrayList<Tree>();
 		myRoads = new ArrayList<Road>();
-		mySunlight = new float[3];
+		mySunlight = new Vector3f();
+
+		material = new Material();
+		material.ambient = new Vector4f(0.3f, 0.3f, 0.3f, 1.0f);
+		material.diffuse = new Vector4f(0.3f, 0.9f, 0.1f, 1.0f);
+		material.specular = new Vector4f(0.1f, 0.1f, 0.1f, 0.1f);
+
 	}
 
 	public Terrain(Dimension size) {
@@ -62,7 +75,7 @@ public class Terrain extends GameObject implements Drawable {
 		return myRoads;
 	}
 
-	public float[] getSunlight() {
+	public Vector3f getSunlight() {
 		return mySunlight;
 	}
 
@@ -71,16 +84,18 @@ public class Terrain extends GameObject implements Drawable {
 	 *
 	 * Note: the sun should be treated as a directional light, without a position
 	 *
-	 * // TODO: Replace this with a Vector3f.
-	 *
 	 * @param dx
 	 * @param dy
 	 * @param dz
 	 */
 	public void setSunlightDir(float dx, float dy, float dz) {
-		mySunlight[0] = dx;
-		mySunlight[1] = dy;
-		mySunlight[2] = dz;
+		mySunlight.x = dx;
+		mySunlight.y = dy;
+		mySunlight.z = dz;
+	}
+
+	public void setSunlightDir(Vector3f delta) {
+		mySunlight = delta.clone();
 	}
 
 
@@ -169,7 +184,7 @@ public class Terrain extends GameObject implements Drawable {
 	 */
 	public void addTree(double x, double z) {
 		double y = altitude(x, z);
-		Tree tree = new Tree(x, y, z);
+		Tree tree = new Tree(this, x, y, z);
 		myTrees.add(tree);
 	}
 
@@ -188,19 +203,40 @@ public class Terrain extends GameObject implements Drawable {
 
 	@Override
 	public void draw(GL2 gl) {
+		gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2.GL_FILL);
+		gl.glColor3d(0.0, 0.0, 0.0);
+		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT, new float[]{material.ambient.x, material.ambient.y, material.ambient.z}, 0);
+		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, new float[]{material.diffuse.x, material.diffuse.y, material.diffuse.z}, 0);
+		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, new float[]{material.specular.x, material.specular.y, material.specular.z}, 0);
+		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SHININESS, new float[]{material.phong.x, material.phong.y, material.phong.z}, 0);
 		for (int x = 0; x < mySize.width - 1; ++x) {
 			for (int z = 0; z < mySize.height - 1; ++z) {
-				gl.glColor3d(1.0, 1.0, 1.0);
-				gl.glBegin(GL2.GL_LINE_LOOP);
+
+				// Experiment the lighting with this.
+				GLUT glut = new GLUT();
+				//glut.glutSolidSphere(2.0, 10, 10);
+
+				Vector3 bottomLeft = new Vector3(x, altitude(x, z), z);
+				Vector3 bottomRight = new Vector3(x + 1, altitude(x + 1, z), z);
+				Vector3 topLeft = new Vector3(x, altitude(x, z + 1), z + 1);
+				Vector3 topRight = new Vector3(x + 1, altitude(x + 1, z + 1), z + 1);
+
+				Vector3 bottomLeftCross = topLeft.subtract(bottomLeft).cross(bottomRight.subtract(bottomLeft));
+				bottomLeftCross.divideSelf(bottomLeftCross.modulus());
+				Vector3 topRightCross = bottomRight.subtract(topRight).cross(topLeft.subtract(topRight));
+				topRightCross.divideSelf(topRightCross.modulus());
+
+				gl.glBegin(GL2.GL_TRIANGLES);
+				gl.glNormal3d(bottomLeftCross.x, bottomLeftCross.y, bottomLeftCross.z);
 				gl.glVertex3d(x, altitude(x, z), z);
 				gl.glVertex3d(x + 1, altitude(x + 1, z), z);
 				gl.glVertex3d(x, altitude(x, z + 1), z + 1);
-				gl.glEnd();
-				gl.glBegin(GL2.GL_LINE_LOOP);
+				gl.glNormal3d(topRightCross.x, topRightCross.y, topRightCross.z);
 				gl.glVertex3d(x + 1, altitude(x + 1, z), z);
 				gl.glVertex3d(x, altitude(x, z + 1), z + 1);
 				gl.glVertex3d(x + 1, altitude(x + 1, z + 1), z + 1);
 				gl.glEnd();
+
 			}
 		}
 	}
