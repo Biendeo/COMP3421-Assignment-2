@@ -9,12 +9,16 @@ import com.jogamp.opengl.GL2;
  * Handles viewing the world.
  */
 public class Camera extends GameObject {
-	private Vector4f clearColor;
+	public Vector4f clearColor;
 
-	private double nearPlane;
-	private double farPlane;
-	private double fov;
+	public double nearPlane;
+	public double farPlane;
+	public double fov;
 
+	/**
+	 * Constructs a camera object with
+	 * @param parent
+	 */
 	public Camera(GameObject parent) {
 		super(parent);
 		clearColor = new Vector4f(0.5f, 0.5f, 0.9f, 1.0f);
@@ -24,8 +28,6 @@ public class Camera extends GameObject {
 
 		this.transform.scale = new Vector3(1.0, 1.0, 1.0);
 	}
-
-	// TODO: Background getter setter.
 
 	/**
 	 * Positions the world view to where the camera is.
@@ -53,7 +55,14 @@ public class Camera extends GameObject {
 		gl.glTranslated(-globalTranslate.x, -globalTranslate.y, -globalTranslate.z);
 	}
 
-
+	/**
+	 * Gets called whenever the window is resized, and handles representing the FOV and aspect.
+	 * @param gl
+	 * @param x
+	 * @param y
+	 * @param width
+	 * @param height
+	 */
 	public void reshape(GL2 gl, int x, int y, int width, int height) {
 
 		// match the projection aspect ratio to the viewport
