@@ -28,6 +28,7 @@ public class Game extends JFrame implements GLEventListener {
 	private Terrain myTerrain;
 	private Camera currentCamera;
 	private List<Light> lights;
+	private List<Texture> textures;
 
 	public Game(Terrain terrain) {
 		super("Assignment 2");
@@ -43,7 +44,6 @@ public class Game extends JFrame implements GLEventListener {
 		// When this is a point light, this value does nothing.
 		mainLight.transform.rotation = new Vector3(sunlightDirection.x, sunlightDirection.y, sunlightDirection.z);
 		lights.add(mainLight);
-
 	}
 
 	/**
@@ -106,6 +106,8 @@ public class Game extends JFrame implements GLEventListener {
 	public void display(GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
 
+		myTerrain.setTexture(textures.get(0));
+
 		// update the objects
 		update();
 
@@ -129,7 +131,11 @@ public class Game extends JFrame implements GLEventListener {
 
 	@Override
 	public void init(GLAutoDrawable drawable) {
+		GL2 gl = drawable.getGL().getGL2();
 
+
+		textures = new ArrayList<Texture>();
+		textures.add(new Texture(gl, "src/ass2/textures/grass01.jpg", true));
 	}
 
 	@Override

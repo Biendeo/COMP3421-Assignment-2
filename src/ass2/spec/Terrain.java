@@ -13,6 +13,7 @@ import java.util.List;
 import ass2.game.Drawable;
 import ass2.game.GameObject;
 import ass2.game.Material;
+import ass2.game.Texture;
 import ass2.math.Vector3;
 import ass2.math.Vector3f;
 import ass2.math.Vector4f;
@@ -37,6 +38,7 @@ public class Terrain extends GameObject implements Drawable {
 	private List<Road> myRoads;
 	private Vector3f mySunlight;
 	private Material material;
+	private Texture texture;
 	/**
 	 * Create a new terrain
 	 *
@@ -54,9 +56,11 @@ public class Terrain extends GameObject implements Drawable {
 
 		material = new Material();
 		material.ambient = new Vector4f(0.3f, 0.3f, 0.3f, 1.0f);
-		material.diffuse = new Vector4f(0.3f, 0.9f, 0.1f, 1.0f);
+		// The diffuse is modulated by the texture now, so this is all white.
+		material.diffuse = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
 		material.specular = new Vector4f(0.1f, 0.1f, 0.1f, 0.1f);
 
+		texture = null;
 	}
 
 	public Terrain(Dimension size) {
@@ -96,6 +100,10 @@ public class Terrain extends GameObject implements Drawable {
 
 	public void setSunlightDir(Vector3f delta) {
 		mySunlight = delta.clone();
+	}
+
+	public void setTexture(Texture texture) {
+		this.texture = texture;
 	}
 
 
@@ -203,18 +211,24 @@ public class Terrain extends GameObject implements Drawable {
 
 	@Override
 	public void draw(GL2 gl) {
+		// The texture should only be enabled by this object.
+		gl.glEnable(GL2.GL_TEXTURE_2D);
+
 		gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2.GL_FILL);
-		gl.glColor3d(0.0, 0.0, 0.0);
+
+		gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
+		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
+		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE);
+
+		gl.glBindTexture(GL2.GL_TEXTURE_2D, texture.getTextureId());
+
+		//gl.glColor3d(0.0, 0.0, 0.0);
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT, new float[]{material.ambient.x, material.ambient.y, material.ambient.z}, 0);
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, new float[]{material.diffuse.x, material.diffuse.y, material.diffuse.z}, 0);
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, new float[]{material.specular.x, material.specular.y, material.specular.z}, 0);
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SHININESS, new float[]{material.phong.x, material.phong.y, material.phong.z}, 0);
 		for (int x = 0; x < mySize.width - 1; ++x) {
 			for (int z = 0; z < mySize.height - 1; ++z) {
-
-				// Experiment the lighting with this.
-				GLUT glut = new GLUT();
-				//glut.glutSolidSphere(2.0, 10, 10);
 
 				Vector3 bottomLeft = new Vector3(x, altitude(x, z), z);
 				Vector3 bottomRight = new Vector3(x + 1, altitude(x + 1, z), z);
@@ -228,16 +242,24 @@ public class Terrain extends GameObject implements Drawable {
 
 				gl.glBegin(GL2.GL_TRIANGLES);
 				gl.glNormal3d(bottomLeftCross.x, bottomLeftCross.y, bottomLeftCross.z);
+				gl.glTexCoord2d(0.0, 0.0);
 				gl.glVertex3d(x, altitude(x, z), z);
+				gl.glTexCoord2d(1.0, 0.0);
 				gl.glVertex3d(x + 1, altitude(x + 1, z), z);
+				gl.glTexCoord2d(0.0, 1.0);
 				gl.glVertex3d(x, altitude(x, z + 1), z + 1);
 				gl.glNormal3d(topRightCross.x, topRightCross.y, topRightCross.z);
+				gl.glTexCoord2d(1.0, 0.0);
 				gl.glVertex3d(x + 1, altitude(x + 1, z), z);
+				gl.glTexCoord2d(0.0, 1.0);
 				gl.glVertex3d(x, altitude(x, z + 1), z + 1);
+				gl.glTexCoord2d(1.0, 1.0);
 				gl.glVertex3d(x + 1, altitude(x + 1, z + 1), z + 1);
 				gl.glEnd();
 
 			}
 		}
+
+		gl.glDisable(GL2.GL_TEXTURE_2D);
 	}
 }
