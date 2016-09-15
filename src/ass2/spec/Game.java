@@ -34,6 +34,7 @@ public class Game extends JFrame implements GLEventListener {
 		myTerrain = terrain;
 		lights = new ArrayList<Light>();
 
+		// This is currently a point light just to demonstrate the effect.
 		Light mainLight = new Light(GameObject.ROOT, GL2.GL_LIGHT0, LightType.POINT);
 		mainLight.material.diffuse = new Vector4f(0.8f, 0.8f, 0.8f, 1.0f);
 		mainLight.transform.position = new Vector3(5.0, 8.0, -5.0);
@@ -101,18 +102,18 @@ public class Game extends JFrame implements GLEventListener {
 	public void display(GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
 
+		// update the objects
+		update();
 
 		// set the view matrix based on the camera position
 		currentCamera.setView(gl);
 
-		// update the objects
-		update();
-
 		// draw the scene tree
 		// Set up the lighting.
 		for (Light l : lights) {
-			l.setLight(gl);
+			l.setLight(gl, currentCamera);
 		}
+
 		GameObject.ROOT.tryDraw(gl);
 		
 	}
