@@ -8,6 +8,7 @@ import javax.swing.JFrame;
 
 import ass2.game.*;
 import ass2.math.Vector3;
+import ass2.math.Vector3f;
 import ass2.math.Vector4f;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLJPanel;
@@ -34,10 +35,13 @@ public class Game extends JFrame implements GLEventListener {
 		myTerrain = terrain;
 		lights = new ArrayList<Light>();
 
-		// This is currently a point light just to demonstrate the effect.
-		Light mainLight = new Light(GameObject.ROOT, GL2.GL_LIGHT0, LightType.POINT);
+		Light mainLight = new Light(GameObject.ROOT, GL2.GL_LIGHT0, LightType.DIRECTIONAL);
 		mainLight.material.diffuse = new Vector4f(0.8f, 0.8f, 0.8f, 1.0f);
+		// When this is a directional light, this value does nothing.
 		mainLight.transform.position = new Vector3(5.0, 8.0, -5.0);
+		Vector3f sunlightDirection = terrain.getSunlight();
+		// When this is a point light, this value does nothing.
+		mainLight.transform.rotation = new Vector3(sunlightDirection.x, sunlightDirection.y, sunlightDirection.z);
 		lights.add(mainLight);
 
 	}
