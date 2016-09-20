@@ -130,4 +130,9 @@ public class Light extends GameObject implements Updatable, Drawable {
 	public void initialize(GL2 gl) {
 
 	}
+
+	@Override
+	public void dispose(GL2 gl) {
+
+	}
 }

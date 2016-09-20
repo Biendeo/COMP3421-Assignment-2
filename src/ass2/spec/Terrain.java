@@ -267,4 +267,9 @@ public class Terrain extends GameObject implements Drawable {
 	public void initialize(GL2 gl) {
 		texture = new Texture(gl, "src/ass2/textures/grass01.jpg", true);
 	}
+
+	@Override
+	public void dispose(GL2 gl) {
+		texture.release(gl);
+	}
 }

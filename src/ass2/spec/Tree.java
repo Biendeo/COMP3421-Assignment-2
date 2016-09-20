@@ -70,4 +70,9 @@ public class Tree extends GameObject implements Drawable {
 	public void initialize(GL2 gl) {
 
 	}
+
+	@Override
+	public void dispose(GL2 gl) {
+
+	}
 }

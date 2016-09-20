@@ -102,16 +102,30 @@ public class Game extends JFrame implements GLEventListener {
 		GameObject.ROOT.tryUpdate(dt);
 	}
 
-	@Override
-	public void display(GLAutoDrawable drawable) {
-		GL2 gl = drawable.getGL().getGL2();
-
+	public void initializeObjects(GL2 gl) {
 		ArrayList<Drawable> uninitializedObjects = new ArrayList<Drawable>(GameObject.UNINITIALIZED_OBJECTS);
 
 		for (Drawable o : uninitializedObjects) {
 			o.initialize(gl);
 			GameObject.UNINITIALIZED_OBJECTS.remove(o);
 		}
+	}
+
+	public void disposeObjects(GL2 gl) {
+		ArrayList<Drawable> undisposedObjects = new ArrayList<Drawable>(GameObject.UNDISPOSED_OBJECTS);
+
+		for (Drawable o : undisposedObjects) {
+			o.dispose(gl);
+			GameObject.UNDISPOSED_OBJECTS.remove(o);
+		}
+	}
+
+	@Override
+	public void display(GLAutoDrawable drawable) {
+		GL2 gl = drawable.getGL().getGL2();
+
+		initializeObjects(gl);
+		disposeObjects(gl);
 
 		// update the objects
 		update();

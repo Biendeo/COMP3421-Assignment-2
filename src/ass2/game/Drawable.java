@@ -13,7 +13,13 @@ public interface Drawable {
 	public void initialize(GL2 gl);
 
 	/**
-	 * Draws the object in the current model view (this should be called except in GameObject).
+	 * Disposes properties about this object (textures, VBOs, etc.).
+	 * @param gl
+	 */
+	public void dispose(GL2 gl);
+
+	/**
+	 * Draws the object in the current model view (this should not be called except in GameObject).
 	 * @param gl
 	 */
 	public void draw(GL2 gl);
