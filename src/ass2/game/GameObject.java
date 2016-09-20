@@ -11,6 +11,8 @@ import java.util.ArrayList;
  */
 public class GameObject {
 	public static final ArrayList<GameObject> ALL_OBJECTS = new ArrayList<GameObject>();
+	public static final ArrayList<Drawable> UNINITIALIZED_OBJECTS = new ArrayList<Drawable>();
+	public static final ArrayList<Drawable> UNDISPOSED_OBJECTS = new ArrayList<Drawable>();
 	public static final GameObject ROOT = new GameObject(null);
 
 	protected GameObject parent;
@@ -40,6 +42,14 @@ public class GameObject {
 
 		ALL_OBJECTS.add(this);
 
+		if (this instanceof Drawable) {
+			if (UNINITIALIZED_OBJECTS == null) {
+				System.err.println("UNINITIALIZED_OBJECTS is null.");
+			}
+
+			UNINITIALIZED_OBJECTS.add((Drawable)this);
+		}
+
 		this.transform = new Transform();
 		this.enabled = true;
 	}
@@ -52,6 +62,11 @@ public class GameObject {
 		for (GameObject g : childrenClonedList) {
 			g.delete();
 		}
+
+		if (this instanceof Drawable) {
+			UNDISPOSED_OBJECTS.add((Drawable)this);
+		}
+
 		ALL_OBJECTS.remove(this);
 		if (parent != null) {
 			parent.children.remove(this);

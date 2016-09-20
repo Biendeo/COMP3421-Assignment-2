@@ -65,4 +65,14 @@ public class Tree extends GameObject implements Drawable {
 		gl.glVertex3d(0.0, 1.0, 0.0);
 		gl.glEnd();
 	}
+
+	@Override
+	public void initialize(GL2 gl) {
+
+	}
+
+	@Override
+	public void dispose(GL2 gl) {
+
+	}
 }

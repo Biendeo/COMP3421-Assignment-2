@@ -28,6 +28,7 @@ public class Game extends JFrame implements GLEventListener {
 	private Terrain myTerrain;
 	private Camera currentCamera;
 	private List<Light> lights;
+	private List<Texture> textures;
 
 	public Game(Terrain terrain) {
 		super("Assignment 2");
@@ -44,7 +45,6 @@ public class Game extends JFrame implements GLEventListener {
 		// When this is a point light, this value does nothing.
 		mainLight.transform.rotation = new Vector3(sunlightDirection.x, sunlightDirection.y, sunlightDirection.z);
 		lights.add(mainLight);
-
 	}
 
 	/**
@@ -103,9 +103,30 @@ public class Game extends JFrame implements GLEventListener {
 		GameObject.ROOT.tryUpdate(dt);
 	}
 
+	public void initializeObjects(GL2 gl) {
+		ArrayList<Drawable> uninitializedObjects = new ArrayList<Drawable>(GameObject.UNINITIALIZED_OBJECTS);
+
+		for (Drawable o : uninitializedObjects) {
+			o.initialize(gl);
+			GameObject.UNINITIALIZED_OBJECTS.remove(o);
+		}
+	}
+
+	public void disposeObjects(GL2 gl) {
+		ArrayList<Drawable> undisposedObjects = new ArrayList<Drawable>(GameObject.UNDISPOSED_OBJECTS);
+
+		for (Drawable o : undisposedObjects) {
+			o.dispose(gl);
+			GameObject.UNDISPOSED_OBJECTS.remove(o);
+		}
+	}
+
 	@Override
 	public void display(GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
+
+		initializeObjects(gl);
+		disposeObjects(gl);
 
 		// update the objects
 		update();
