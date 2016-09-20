@@ -7,6 +7,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +19,7 @@ import ass2.game.Texture;
 import ass2.math.Vector3;
 import ass2.math.Vector3f;
 import ass2.math.Vector4f;
+import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.util.gl2.GLUT;
@@ -39,6 +42,11 @@ public class Terrain extends GameObject implements Drawable {
 	private Vector3f mySunlight;
 	private Material material;
 	private Texture texture;
+
+	private int vertexBufferIndex;
+	private int normalBufferIndex;
+	private int textureBufferIndex;
+
 	/**
 	 * Create a new terrain
 	 *
@@ -61,6 +69,7 @@ public class Terrain extends GameObject implements Drawable {
 		material.specular = new Vector4f(0.1f, 0.1f, 0.1f, 0.1f);
 
 		texture = null;
+		vertexBufferIndex = -1;
 	}
 
 	public Terrain(Dimension size) {
@@ -227,6 +236,51 @@ public class Terrain extends GameObject implements Drawable {
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, new float[]{material.diffuse.x, material.diffuse.y, material.diffuse.z}, 0);
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, new float[]{material.specular.x, material.specular.y, material.specular.z}, 0);
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SHININESS, new float[]{material.phong.x, material.phong.y, material.phong.z}, 0);
+
+		gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+		gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
+		gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
+		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vertexBufferIndex);
+		//gl.glVertexPointer(mySize.width * mySize.height * 4 * 3, GL.GL_FLOAT, 0, 0);
+		//gl.glTexCoordPointer(2, GL.GL_FLOAT, 0, (mySize.width * mySize.height * 4));
+
+		gl.glVertexPointer(mySize.width * mySize.height, GL2.GL_FLOAT, 0, mySize.width * mySize.height * 4);
+		gl.glDrawArrays(GL2.GL_TRIANGLES, 0, mySize.width * mySize.height);
+
+		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+		gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
+		gl.glDisableClientState(GL2.GL_NORMAL_ARRAY);
+		gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
+
+		gl.glDisable(GL2.GL_TEXTURE_2D);
+	}
+
+	@Override
+	public void initialize(GL2 gl) {
+		texture = new Texture(gl, "src/ass2/textures/grass01.jpg", true);
+
+		int[] buffers = new int[3];
+		gl.glGenBuffers(3, buffers, 0);
+
+		vertexBufferIndex = buffers[0];
+		normalBufferIndex = buffers[1];
+		textureBufferIndex = buffers[2];
+
+		// Format:
+		// [x1, y1, z1, x2, y2, z2, ... ]
+		// Vertices are added by z-row.
+		float[] vertices = new float[(mySize.width) * (mySize.height) * 4 * 3];
+
+		// Format:
+		// [x1, y1, z1, x2, y2, z2, ... ]
+		// The +0 face is added, then the +1 face. This is then added by z-row.
+		float[] normals = new float[(mySize.width) * (mySize.height) * 2 * 3];
+
+		// Format:
+		// [0, 1, 2, 3, 1, 2, ... ]
+		// The +0 face is added, then the +1 face. This is then added by z-row.
+		int[] faceVertices = new int[(mySize.width) * (mySize.height) * 2 * 3];
+
 		for (int x = 0; x < mySize.width - 1; ++x) {
 			for (int z = 0; z < mySize.height - 1; ++z) {
 
@@ -240,32 +294,43 @@ public class Terrain extends GameObject implements Drawable {
 				Vector3 topRightCross = bottomRight.subtract(topRight).cross(topLeft.subtract(topRight));
 				topRightCross.divideSelf(topRightCross.modulus());
 
-				gl.glBegin(GL2.GL_TRIANGLES);
-				gl.glNormal3d(bottomLeftCross.x, bottomLeftCross.y, bottomLeftCross.z);
-				gl.glTexCoord2d(0.0, 0.0);
-				gl.glVertex3d(x, altitude(x, z), z);
-				gl.glTexCoord2d(1.0, 0.0);
-				gl.glVertex3d(x + 1, altitude(x + 1, z), z);
-				gl.glTexCoord2d(0.0, 1.0);
-				gl.glVertex3d(x, altitude(x, z + 1), z + 1);
-				gl.glNormal3d(topRightCross.x, topRightCross.y, topRightCross.z);
-				gl.glTexCoord2d(1.0, 0.0);
-				gl.glVertex3d(x + 1, altitude(x + 1, z), z);
-				gl.glTexCoord2d(0.0, 1.0);
-				gl.glVertex3d(x, altitude(x, z + 1), z + 1);
-				gl.glTexCoord2d(1.0, 1.0);
-				gl.glVertex3d(x + 1, altitude(x + 1, z + 1), z + 1);
-				gl.glEnd();
+				vertices[((x * mySize.height) + z) * 12] = (float)bottomLeft.x;
+				vertices[((x * mySize.height) + z) * 12 + 1] = (float)bottomLeft.y;
+				vertices[((x * mySize.height) + z) * 12 + 2] = (float)bottomLeft.z;
+
+				vertices[((x * mySize.height) + z) * 12 + 3] = (float)topLeft.x;
+				vertices[((x * mySize.height) + z) * 12 + 4] = (float)topLeft.y;
+				vertices[((x * mySize.height) + z) * 12 + 5] = (float)topLeft.z;
+
+				vertices[((x * mySize.height) + z) * 12 + 6] = (float)bottomRight.x;
+				vertices[((x * mySize.height) + z) * 12 + 7] = (float)bottomRight.y;
+				vertices[((x * mySize.height) + z) * 12 + 8] = (float)bottomRight.z;
+
+				vertices[((x * mySize.height) + z) * 12 + 9] = (float)topRight.x;
+				vertices[((x * mySize.height) + z) * 12 + 10] = (float)topRight.y;
+				vertices[((x * mySize.height) + z) * 12 + 11] = (float)topRight.z;
+
+				normals[((x * mySize.height) + z) * 6] = (float) bottomLeftCross.x;
+				normals[((x * mySize.height) + z) * 6 + 1] = (float) bottomLeftCross.y;
+				normals[((x * mySize.height) + z) * 6 + 2] = (float) bottomLeftCross.z;
+				normals[((x * mySize.height) + z) * 6 + 3] = (float) topRightCross.x;
+				normals[((x * mySize.height) + z) * 6 + 4] = (float) topRightCross.y;
+				normals[((x * mySize.height) + z) * 6 + 5] = (float) topRightCross.z;
+
+				faceVertices[((x * mySize.height) + z) * 6] = ((x * mySize.height) + z) * 4;
+				faceVertices[((x * mySize.height) + z) * 6 + 1] = ((x * mySize.height) + z) * 4 + 1;
+				faceVertices[((x * mySize.height) + z) * 6 + 2] = ((x * mySize.height) + z) * 4 + 2;
+				faceVertices[((x * mySize.height) + z) * 6 + 3] = ((x * mySize.height) + z) * 4 + 3;
 
 			}
 		}
 
-		gl.glDisable(GL2.GL_TEXTURE_2D);
-	}
+		FloatBuffer vertexBuffer = Buffers.newDirectFloatBuffer(vertices);
+		FloatBuffer normalBuffer = Buffers.newDirectFloatBuffer(normals);
+		IntBuffer faceVerticesBuffer = Buffers.newDirectIntBuffer(faceVertices);
 
-	@Override
-	public void initialize(GL2 gl) {
-		texture = new Texture(gl, "src/ass2/textures/grass01.jpg", true);
+		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, vertexBufferIndex);
+		gl.glBufferData(GL2.GL_ARRAY_BUFFER, vertices.length * 4, vertexBuffer, GL2.GL_STATIC_DRAW);
 	}
 
 	@Override
