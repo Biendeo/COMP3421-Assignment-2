@@ -125,4 +125,9 @@ public class Light extends GameObject implements Updatable, Drawable {
 			glut.glutSolidSphere(0.5, 8, 8);
 		}
 	}
+
+	@Override
+	public void initialize(GL2 gl) {
+
+	}
 }

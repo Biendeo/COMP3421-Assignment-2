@@ -106,7 +106,12 @@ public class Game extends JFrame implements GLEventListener {
 	public void display(GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
 
-		myTerrain.setTexture(textures.get(0));
+		ArrayList<Drawable> uninitializedObjects = new ArrayList<Drawable>(GameObject.UNINITIALIZED_OBJECTS);
+
+		for (Drawable o : uninitializedObjects) {
+			o.initialize(gl);
+			GameObject.UNINITIALIZED_OBJECTS.remove(o);
+		}
 
 		// update the objects
 		update();
@@ -131,11 +136,7 @@ public class Game extends JFrame implements GLEventListener {
 
 	@Override
 	public void init(GLAutoDrawable drawable) {
-		GL2 gl = drawable.getGL().getGL2();
 
-
-		textures = new ArrayList<Texture>();
-		textures.add(new Texture(gl, "src/ass2/textures/grass01.jpg", true));
 	}
 
 	@Override

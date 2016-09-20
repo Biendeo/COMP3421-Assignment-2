@@ -262,4 +262,9 @@ public class Terrain extends GameObject implements Drawable {
 
 		gl.glDisable(GL2.GL_TEXTURE_2D);
 	}
+
+	@Override
+	public void initialize(GL2 gl) {
+		texture = new Texture(gl, "src/ass2/textures/grass01.jpg", true);
+	}
 }
