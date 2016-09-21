@@ -1,14 +1,7 @@
 package ass2.spec;
 
 import java.awt.Dimension;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Reader;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,10 +15,6 @@ import ass2.math.Vector4f;
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.util.gl2.GLUT;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 
 
 /**
@@ -43,9 +32,7 @@ public class Terrain extends GameObject implements Drawable {
 	private Material material;
 	private Texture texture;
 
-	private int vertexBufferIndex;
-	private int normalBufferIndex;
-	private int textureBufferIndex;
+	private int vaoIndex;
 
 	/**
 	 * Create a new terrain
@@ -69,7 +56,7 @@ public class Terrain extends GameObject implements Drawable {
 		material.specular = new Vector4f(0.1f, 0.1f, 0.1f, 0.1f);
 
 		texture = null;
-		vertexBufferIndex = -1;
+		vaoIndex = 0;
 	}
 
 	public Terrain(Dimension size) {
@@ -237,21 +224,15 @@ public class Terrain extends GameObject implements Drawable {
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, new float[]{material.specular.x, material.specular.y, material.specular.z}, 0);
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SHININESS, new float[]{material.phong.x, material.phong.y, material.phong.z}, 0);
 
-		gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
-		gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
-		gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
-		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vertexBufferIndex);
-		//gl.glVertexPointer(mySize.width * mySize.height * 4 * 3, GL.GL_FLOAT, 0, 0);
-		//gl.glTexCoordPointer(2, GL.GL_FLOAT, 0, (mySize.width * mySize.height * 4));
+		gl.glBindVertexArray(vaoIndex);
+		gl.glEnableVertexAttribArray(0);
+		gl.glEnableVertexAttribArray(1);
+		// I'm not too sure why disabling this works but enabling doesn't.
+		//gl.glEnableVertexAttribArray(2);
 
-		gl.glVertexPointer(mySize.width * mySize.height, GL2.GL_FLOAT, 0, mySize.width * mySize.height * 4);
-		gl.glDrawArrays(GL2.GL_TRIANGLES, 0, mySize.width * mySize.height);
+		gl.glDrawArrays(GL2.GL_TRIANGLES, 0, mySize.width * mySize.height * 18);
 
-		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
-		gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
-		gl.glDisableClientState(GL2.GL_NORMAL_ARRAY);
-		gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
-
+		gl.glBindVertexArray(0);
 		gl.glDisable(GL2.GL_TEXTURE_2D);
 	}
 
@@ -259,27 +240,31 @@ public class Terrain extends GameObject implements Drawable {
 	public void initialize(GL2 gl) {
 		texture = new Texture(gl, "src/ass2/textures/grass01.jpg", true);
 
+		int[] vertexArray = new int[1];
+		gl.glGenVertexArrays(1, vertexArray, 0);
+		vaoIndex = vertexArray[0];
+
 		int[] buffers = new int[3];
 		gl.glGenBuffers(3, buffers, 0);
 
-		vertexBufferIndex = buffers[0];
-		normalBufferIndex = buffers[1];
-		textureBufferIndex = buffers[2];
+		int vertexBufferIndex = buffers[0];
+		int normalBufferIndex = buffers[1];
+		int textureBufferIndex = buffers[2];
 
 		// Format:
 		// [x1, y1, z1, x2, y2, z2, ... ]
 		// Vertices are added by z-row.
-		float[] vertices = new float[(mySize.width) * (mySize.height) * 4 * 3];
+		float[] vertices = new float[(mySize.width) * (mySize.height) * 6 * 3];
 
 		// Format:
 		// [x1, y1, z1, x2, y2, z2, ... ]
 		// The +0 face is added, then the +1 face. This is then added by z-row.
-		float[] normals = new float[(mySize.width) * (mySize.height) * 2 * 3];
+		float[] normals = new float[(mySize.width) * (mySize.height) * 6 * 3];
 
 		// Format:
 		// [0, 1, 2, 3, 1, 2, ... ]
 		// The +0 face is added, then the +1 face. This is then added by z-row.
-		int[] faceVertices = new int[(mySize.width) * (mySize.height) * 2 * 3];
+		float[] texturePositions = new float[(mySize.width) * (mySize.height) * 6 * 2];
 
 		for (int x = 0; x < mySize.width - 1; ++x) {
 			for (int z = 0; z < mySize.height - 1; ++z) {
@@ -294,47 +279,98 @@ public class Terrain extends GameObject implements Drawable {
 				Vector3 topRightCross = bottomRight.subtract(topRight).cross(topLeft.subtract(topRight));
 				topRightCross.divideSelf(topRightCross.modulus());
 
-				vertices[((x * mySize.height) + z) * 12] = (float)bottomLeft.x;
-				vertices[((x * mySize.height) + z) * 12 + 1] = (float)bottomLeft.y;
-				vertices[((x * mySize.height) + z) * 12 + 2] = (float)bottomLeft.z;
+				vertices[((x * mySize.height) + z) * 18] = (float)bottomLeft.x;
+				vertices[((x * mySize.height) + z) * 18 + 1] = (float)bottomLeft.y;
+				vertices[((x * mySize.height) + z) * 18 + 2] = (float)bottomLeft.z;
 
-				vertices[((x * mySize.height) + z) * 12 + 3] = (float)topLeft.x;
-				vertices[((x * mySize.height) + z) * 12 + 4] = (float)topLeft.y;
-				vertices[((x * mySize.height) + z) * 12 + 5] = (float)topLeft.z;
+				vertices[((x * mySize.height) + z) * 18 + 3] = (float)topLeft.x;
+				vertices[((x * mySize.height) + z) * 18 + 4] = (float)topLeft.y;
+				vertices[((x * mySize.height) + z) * 18 + 5] = (float)topLeft.z;
 
-				vertices[((x * mySize.height) + z) * 12 + 6] = (float)bottomRight.x;
-				vertices[((x * mySize.height) + z) * 12 + 7] = (float)bottomRight.y;
-				vertices[((x * mySize.height) + z) * 12 + 8] = (float)bottomRight.z;
+				vertices[((x * mySize.height) + z) * 18 + 6] = (float)bottomRight.x;
+				vertices[((x * mySize.height) + z) * 18 + 7] = (float)bottomRight.y;
+				vertices[((x * mySize.height) + z) * 18 + 8] = (float)bottomRight.z;
 
-				vertices[((x * mySize.height) + z) * 12 + 9] = (float)topRight.x;
-				vertices[((x * mySize.height) + z) * 12 + 10] = (float)topRight.y;
-				vertices[((x * mySize.height) + z) * 12 + 11] = (float)topRight.z;
+				vertices[((x * mySize.height) + z) * 18 + 9] = (float)topRight.x;
+				vertices[((x * mySize.height) + z) * 18 + 10] = (float)topRight.y;
+				vertices[((x * mySize.height) + z) * 18 + 11] = (float)topRight.z;
 
-				normals[((x * mySize.height) + z) * 6] = (float) bottomLeftCross.x;
-				normals[((x * mySize.height) + z) * 6 + 1] = (float) bottomLeftCross.y;
-				normals[((x * mySize.height) + z) * 6 + 2] = (float) bottomLeftCross.z;
-				normals[((x * mySize.height) + z) * 6 + 3] = (float) topRightCross.x;
-				normals[((x * mySize.height) + z) * 6 + 4] = (float) topRightCross.y;
-				normals[((x * mySize.height) + z) * 6 + 5] = (float) topRightCross.z;
+				vertices[((x * mySize.height) + z) * 18 + 12] = (float)topLeft.x;
+				vertices[((x * mySize.height) + z) * 18 + 13] = (float)topLeft.y;
+				vertices[((x * mySize.height) + z) * 18 + 14] = (float)topLeft.z;
 
-				faceVertices[((x * mySize.height) + z) * 6] = ((x * mySize.height) + z) * 4;
-				faceVertices[((x * mySize.height) + z) * 6 + 1] = ((x * mySize.height) + z) * 4 + 1;
-				faceVertices[((x * mySize.height) + z) * 6 + 2] = ((x * mySize.height) + z) * 4 + 2;
-				faceVertices[((x * mySize.height) + z) * 6 + 3] = ((x * mySize.height) + z) * 4 + 3;
+				vertices[((x * mySize.height) + z) * 18 + 15] = (float)bottomRight.x;
+				vertices[((x * mySize.height) + z) * 18 + 16] = (float)bottomRight.y;
+				vertices[((x * mySize.height) + z) * 18 + 17] = (float)bottomRight.z;
+
+				normals[((x * mySize.height) + z) * 18] = (float) bottomLeftCross.x;
+				normals[((x * mySize.height) + z) * 18 + 1] = (float) bottomLeftCross.y;
+				normals[((x * mySize.height) + z) * 18 + 2] = (float) bottomLeftCross.z;
+				normals[((x * mySize.height) + z) * 18 + 3] = (float) bottomLeftCross.x;
+				normals[((x * mySize.height) + z) * 18 + 4] = (float) bottomLeftCross.y;
+				normals[((x * mySize.height) + z) * 18 + 5] = (float) bottomLeftCross.z;
+				normals[((x * mySize.height) + z) * 18 + 6] = (float) bottomLeftCross.x;
+				normals[((x * mySize.height) + z) * 18 + 7] = (float) bottomLeftCross.y;
+				normals[((x * mySize.height) + z) * 18 + 8] = (float) bottomLeftCross.z;
+
+				normals[((x * mySize.height) + z) * 18 + 9] = (float) topRightCross.x;
+				normals[((x * mySize.height) + z) * 18 + 10] = (float) topRightCross.y;
+				normals[((x * mySize.height) + z) * 18 + 11] = (float) topRightCross.z;
+				normals[((x * mySize.height) + z) * 18 + 12] = (float) topRightCross.x;
+				normals[((x * mySize.height) + z) * 18 + 13] = (float) topRightCross.y;
+				normals[((x * mySize.height) + z) * 18 + 14] = (float) topRightCross.z;
+				normals[((x * mySize.height) + z) * 18 + 15] = (float) topRightCross.x;
+				normals[((x * mySize.height) + z) * 18 + 16] = (float) topRightCross.y;
+				normals[((x * mySize.height) + z) * 18 + 17] = (float) topRightCross.z;
+
+				texturePositions[((x * mySize.height) + z) * 12] = 0.0f;
+				texturePositions[((x * mySize.height) + z) * 12 + 1] = 0.0f;
+				texturePositions[((x * mySize.height) + z) * 12 + 2] = 0.0f;
+				texturePositions[((x * mySize.height) + z) * 12 + 3] = 1.0f;
+				texturePositions[((x * mySize.height) + z) * 12 + 4] = 1.0f;
+				texturePositions[((x * mySize.height) + z) * 12 + 5] = 0.0f;
+
+				texturePositions[((x * mySize.height) + z) * 12 + 6] = 1.0f;
+				texturePositions[((x * mySize.height) + z) * 12 + 7] = 1.0f;
+				texturePositions[((x * mySize.height) + z) * 12 + 8] = 0.0f;
+				texturePositions[((x * mySize.height) + z) * 12 + 9] = 1.0f;
+				texturePositions[((x * mySize.height) + z) * 12 + 10] = 1.0f;
+				texturePositions[((x * mySize.height) + z) * 12 + 11] = 0.0f;
 
 			}
 		}
 
 		FloatBuffer vertexBuffer = Buffers.newDirectFloatBuffer(vertices);
 		FloatBuffer normalBuffer = Buffers.newDirectFloatBuffer(normals);
-		IntBuffer faceVerticesBuffer = Buffers.newDirectIntBuffer(faceVertices);
+		FloatBuffer textureBuffer = Buffers.newDirectFloatBuffer(texturePositions);
+
+		gl.glBindVertexArray(vaoIndex);
 
 		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, vertexBufferIndex);
 		gl.glBufferData(GL2.GL_ARRAY_BUFFER, vertices.length * 4, vertexBuffer, GL2.GL_STATIC_DRAW);
+		gl.glVertexPointer(3, GL2.GL_FLOAT, 0, 0);
+		gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+		gl.glVertexAttribPointer(0, 3, GL2.GL_FLOAT, false, 0, 0);
+
+		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, normalBufferIndex);
+		gl.glBufferData(GL2.GL_ARRAY_BUFFER, normals.length * 4, normalBuffer, GL2.GL_STATIC_DRAW);
+		gl.glNormalPointer(GL2.GL_FLOAT, 0, 0);
+		gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
+		gl.glVertexAttribPointer(1, 3, GL2.GL_FLOAT, false, 0, 0);
+
+		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, textureBufferIndex);
+		gl.glBufferData(GL2.GL_ARRAY_BUFFER, texturePositions.length * 4, textureBuffer, GL2.GL_STATIC_DRAW);
+		gl.glTexCoordPointer(2, GL2.GL_FLOAT, 0, 0);
+		gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
+		gl.glVertexAttribPointer(2, 3, GL2.GL_FLOAT, false, 0, 0);
 	}
 
 	@Override
 	public void dispose(GL2 gl) {
 		texture.release(gl);
+
+		int[] vaoArray = new int[1];
+		vaoArray[0] = vaoIndex;
+		gl.glDeleteVertexArrays(1, vaoArray, 0);
 	}
 }
