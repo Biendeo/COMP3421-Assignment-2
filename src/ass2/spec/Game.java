@@ -93,8 +93,8 @@ public class Game extends JFrame implements GLEventListener {
 	private void update() {
 
 		// compute the time since the last frame
-		long time = System.currentTimeMillis();
-		double dt = (time - myTime) / 1000.0;
+		long time = System.nanoTime();
+		double dt = (time - myTime) / 1000000000.0;
 		myTime = time;
 
 		// Update the input.
@@ -137,7 +137,7 @@ public class Game extends JFrame implements GLEventListener {
 		// draw the scene tree
 		// Set up the lighting.
 		for (Light l : lights) {
-			l.setLight(gl, currentCamera);
+			l.setLight(gl);
 		}
 
 		GameObject.ROOT.tryDraw(gl);
