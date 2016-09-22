@@ -69,6 +69,8 @@ public class Light extends GameObject implements Updatable, Drawable {
 
 			float[] pos = new float[]{(float)lightVector.x, (float)lightVector.y, (float)lightVector.z, lightType};
 			gl.glLightfv(lightNumber, GL2.GL_POSITION, pos, 0);
+			System.out.println(Double.toString(transform.rotation.x) + ", " + Double.toString(transform.rotation.y) + ", " + Double.toString(transform.rotation.z));
+			System.out.println(Double.toString(lightVector.x) + ", " + Double.toString(lightVector.y) + ", " + Double.toString(lightVector.z));
 
 		} else {
 			gl.glDisable(lightNumber);
@@ -129,7 +131,12 @@ public class Light extends GameObject implements Updatable, Drawable {
 	public void draw(GL2 gl) {
 		if (visibleModel) {
 			GLUT glut = new GLUT();
-			glut.glutSolidSphere(0.5, 8, 8);
+			if (type == LightType.POINT) {
+				glut.glutSolidSphere(0.5, 8, 8);
+			} else if (type == LightType.DIRECTIONAL) {
+				gl.glRotated(90.0, 0.0, 1.0, 0.0);
+				glut.glutSolidCone(0.5, 1.0, 8, 8);
+			}
 		}
 	}
 
