@@ -2,6 +2,7 @@ package ass2.spec;
 
 import java.awt.Dimension;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +34,7 @@ public class Terrain extends GameObject implements Drawable {
 	private Texture texture;
 
 	private int vaoIndex;
+	private int vertexIndexBuffer;
 
 	/**
 	 * Create a new terrain
@@ -230,7 +232,7 @@ public class Terrain extends GameObject implements Drawable {
 		// I'm not too sure why disabling this works but enabling doesn't.
 		//gl.glEnableVertexAttribArray(2);
 
-		gl.glDrawArrays(GL2.GL_TRIANGLES, 0, mySize.width * mySize.height * 18);
+		gl.glDrawElements(GL2.GL_TRIANGLES, (mySize.width - 1) * (mySize.height - 1) * 6, GL2.GL_UNSIGNED_INT, 0);
 
 		gl.glBindVertexArray(0);
 		gl.glDisable(GL2.GL_TEXTURE_2D);
@@ -244,27 +246,40 @@ public class Terrain extends GameObject implements Drawable {
 		gl.glGenVertexArrays(1, vertexArray, 0);
 		vaoIndex = vertexArray[0];
 
-		int[] buffers = new int[3];
-		gl.glGenBuffers(3, buffers, 0);
+		int[] buffers = new int[4];
+		gl.glGenBuffers(4, buffers, 0);
 
 		int vertexBufferIndex = buffers[0];
-		int normalBufferIndex = buffers[1];
-		int textureBufferIndex = buffers[2];
+		int vertexOrderBufferIndex = buffers[1];
+		int normalBufferIndex = buffers[2];
+		int textureBufferIndex = buffers[3];
 
 		// Format:
 		// [x1, y1, z1, x2, y2, z2, ... ]
 		// Vertices are added by z-row.
-		float[] vertices = new float[(mySize.width) * (mySize.height) * 6 * 3];
+		float[] vertices = new float[(mySize.width) * (mySize.height) * 3];
+
+		int[] vertexOrders = new int[(mySize.width - 1) * (mySize.height - 1) * 6];
 
 		// Format:
 		// [x1, y1, z1, x2, y2, z2, ... ]
 		// The +0 face is added, then the +1 face. This is then added by z-row.
-		float[] normals = new float[(mySize.width) * (mySize.height) * 6 * 3];
+		float[] normals = new float[(mySize.width - 1) * (mySize.height - 1) * 6 * 3];
 
 		// Format:
 		// [0, 1, 2, 3, 1, 2, ... ]
 		// The +0 face is added, then the +1 face. This is then added by z-row.
-		float[] texturePositions = new float[(mySize.width) * (mySize.height) * 6 * 2];
+		float[] texturePositions = new float[(mySize.width - 1) * (mySize.height - 1) * 6 * 2];
+
+		for (int x = 0; x < mySize.width; ++x) {
+			for (int z = 0; z < mySize.height; ++z) {
+				Vector3 corner = new Vector3(x, altitude(x, z), z);
+
+				vertices[(x * (mySize.height) + z)] = (float)corner.x;
+				vertices[(x * (mySize.height) + z) + 1] = (float)corner.y;
+				vertices[(x * (mySize.height) + z) + 2] = (float)corner.z;
+			}
+		}
 
 		for (int x = 0; x < mySize.width - 1; ++x) {
 			for (int z = 0; z < mySize.height - 1; ++z) {
@@ -279,68 +294,52 @@ public class Terrain extends GameObject implements Drawable {
 				Vector3 topRightCross = bottomRight.subtract(topRight).cross(topLeft.subtract(topRight));
 				topRightCross.divideSelf(topRightCross.modulus());
 
-				vertices[((x * mySize.height) + z) * 18] = (float)bottomLeft.x;
-				vertices[((x * mySize.height) + z) * 18 + 1] = (float)bottomLeft.y;
-				vertices[((x * mySize.height) + z) * 18 + 2] = (float)bottomLeft.z;
+				vertexOrders[((x * (mySize.height - 1)) + z) * 6] = (x * (mySize.height)) + z;
+				vertexOrders[((x * (mySize.height - 1)) + z) * 6 + 1] = (x * (mySize.height)) + z + 1;
+				vertexOrders[((x * (mySize.height - 1)) + z) * 6 + 2] = ((x + 1) * (mySize.height)) + z;
+				vertexOrders[((x * (mySize.height - 1)) + z) * 6 + 3] = ((x + 1) * (mySize.height)) + z + 1;
+				vertexOrders[((x * (mySize.height - 1)) + z) * 6 + 4] = (x * (mySize.height)) + z + 1;
+				vertexOrders[((x * (mySize.height - 1)) + z) * 6 + 5] = ((x + 1) * (mySize.height)) + z;
 
-				vertices[((x * mySize.height) + z) * 18 + 3] = (float)topLeft.x;
-				vertices[((x * mySize.height) + z) * 18 + 4] = (float)topLeft.y;
-				vertices[((x * mySize.height) + z) * 18 + 5] = (float)topLeft.z;
+				normals[((x * (mySize.height - 1)) + z) * 18] = (float) bottomLeftCross.x;
+				normals[((x * (mySize.height - 1)) + z) * 18 + 1] = (float) bottomLeftCross.y;
+				normals[((x * (mySize.height - 1)) + z) * 18 + 2] = (float) bottomLeftCross.z;
+				normals[((x * (mySize.height - 1)) + z) * 18 + 3] = (float) bottomLeftCross.x;
+				normals[((x * (mySize.height - 1)) + z) * 18 + 4] = (float) bottomLeftCross.y;
+				normals[((x * (mySize.height - 1)) + z) * 18 + 5] = (float) bottomLeftCross.z;
+				normals[((x * (mySize.height - 1)) + z) * 18 + 6] = (float) bottomLeftCross.x;
+				normals[((x * (mySize.height - 1)) + z) * 18 + 7] = (float) bottomLeftCross.y;
+				normals[((x * (mySize.height - 1)) + z) * 18 + 8] = (float) bottomLeftCross.z;
 
-				vertices[((x * mySize.height) + z) * 18 + 6] = (float)bottomRight.x;
-				vertices[((x * mySize.height) + z) * 18 + 7] = (float)bottomRight.y;
-				vertices[((x * mySize.height) + z) * 18 + 8] = (float)bottomRight.z;
+				normals[((x * (mySize.height - 1)) + z) * 18 + 9] = (float) topRightCross.x;
+				normals[((x * (mySize.height - 1)) + z) * 18 + 10] = (float) topRightCross.y;
+				normals[((x * (mySize.height - 1)) + z) * 18 + 11] = (float) topRightCross.z;
+				normals[((x * (mySize.height - 1)) + z) * 18 + 12] = (float) topRightCross.x;
+				normals[((x * (mySize.height - 1)) + z) * 18 + 13] = (float) topRightCross.y;
+				normals[((x * (mySize.height - 1)) + z) * 18 + 14] = (float) topRightCross.z;
+				normals[((x * (mySize.height - 1)) + z) * 18 + 15] = (float) topRightCross.x;
+				normals[((x * (mySize.height - 1)) + z) * 18 + 16] = (float) topRightCross.y;
+				normals[((x * (mySize.height - 1)) + z) * 18 + 17] = (float) topRightCross.z;
 
-				vertices[((x * mySize.height) + z) * 18 + 9] = (float)topRight.x;
-				vertices[((x * mySize.height) + z) * 18 + 10] = (float)topRight.y;
-				vertices[((x * mySize.height) + z) * 18 + 11] = (float)topRight.z;
+				texturePositions[((x * (mySize.height - 1)) + z) * 12] = 0.0f;
+				texturePositions[((x * (mySize.height - 1)) + z) * 12 + 1] = 0.0f;
+				texturePositions[((x * (mySize.height - 1)) + z) * 12 + 2] = 0.0f;
+				texturePositions[((x * (mySize.height - 1)) + z) * 12 + 3] = 1.0f;
+				texturePositions[((x * (mySize.height - 1)) + z) * 12 + 4] = 1.0f;
+				texturePositions[((x * (mySize.height - 1)) + z) * 12 + 5] = 0.0f;
 
-				vertices[((x * mySize.height) + z) * 18 + 12] = (float)topLeft.x;
-				vertices[((x * mySize.height) + z) * 18 + 13] = (float)topLeft.y;
-				vertices[((x * mySize.height) + z) * 18 + 14] = (float)topLeft.z;
-
-				vertices[((x * mySize.height) + z) * 18 + 15] = (float)bottomRight.x;
-				vertices[((x * mySize.height) + z) * 18 + 16] = (float)bottomRight.y;
-				vertices[((x * mySize.height) + z) * 18 + 17] = (float)bottomRight.z;
-
-				normals[((x * mySize.height) + z) * 18] = (float) bottomLeftCross.x;
-				normals[((x * mySize.height) + z) * 18 + 1] = (float) bottomLeftCross.y;
-				normals[((x * mySize.height) + z) * 18 + 2] = (float) bottomLeftCross.z;
-				normals[((x * mySize.height) + z) * 18 + 3] = (float) bottomLeftCross.x;
-				normals[((x * mySize.height) + z) * 18 + 4] = (float) bottomLeftCross.y;
-				normals[((x * mySize.height) + z) * 18 + 5] = (float) bottomLeftCross.z;
-				normals[((x * mySize.height) + z) * 18 + 6] = (float) bottomLeftCross.x;
-				normals[((x * mySize.height) + z) * 18 + 7] = (float) bottomLeftCross.y;
-				normals[((x * mySize.height) + z) * 18 + 8] = (float) bottomLeftCross.z;
-
-				normals[((x * mySize.height) + z) * 18 + 9] = (float) topRightCross.x;
-				normals[((x * mySize.height) + z) * 18 + 10] = (float) topRightCross.y;
-				normals[((x * mySize.height) + z) * 18 + 11] = (float) topRightCross.z;
-				normals[((x * mySize.height) + z) * 18 + 12] = (float) topRightCross.x;
-				normals[((x * mySize.height) + z) * 18 + 13] = (float) topRightCross.y;
-				normals[((x * mySize.height) + z) * 18 + 14] = (float) topRightCross.z;
-				normals[((x * mySize.height) + z) * 18 + 15] = (float) topRightCross.x;
-				normals[((x * mySize.height) + z) * 18 + 16] = (float) topRightCross.y;
-				normals[((x * mySize.height) + z) * 18 + 17] = (float) topRightCross.z;
-
-				texturePositions[((x * mySize.height) + z) * 12] = 0.0f;
-				texturePositions[((x * mySize.height) + z) * 12 + 1] = 0.0f;
-				texturePositions[((x * mySize.height) + z) * 12 + 2] = 0.0f;
-				texturePositions[((x * mySize.height) + z) * 12 + 3] = 1.0f;
-				texturePositions[((x * mySize.height) + z) * 12 + 4] = 1.0f;
-				texturePositions[((x * mySize.height) + z) * 12 + 5] = 0.0f;
-
-				texturePositions[((x * mySize.height) + z) * 12 + 6] = 1.0f;
-				texturePositions[((x * mySize.height) + z) * 12 + 7] = 1.0f;
-				texturePositions[((x * mySize.height) + z) * 12 + 8] = 0.0f;
-				texturePositions[((x * mySize.height) + z) * 12 + 9] = 1.0f;
-				texturePositions[((x * mySize.height) + z) * 12 + 10] = 1.0f;
-				texturePositions[((x * mySize.height) + z) * 12 + 11] = 0.0f;
+				texturePositions[((x * (mySize.height - 1)) + z) * 12 + 6] = 1.0f;
+				texturePositions[((x * (mySize.height - 1)) + z) * 12 + 7] = 1.0f;
+				texturePositions[((x * (mySize.height - 1)) + z) * 12 + 8] = 0.0f;
+				texturePositions[((x * (mySize.height - 1)) + z) * 12 + 9] = 1.0f;
+				texturePositions[((x * (mySize.height - 1)) + z) * 12 + 10] = 1.0f;
+				texturePositions[((x * (mySize.height - 1)) + z) * 12 + 11] = 0.0f;
 
 			}
 		}
 
 		FloatBuffer vertexBuffer = Buffers.newDirectFloatBuffer(vertices);
+		IntBuffer vertexOrderBuffer = Buffers.newDirectIntBuffer(vertexOrders);
 		FloatBuffer normalBuffer = Buffers.newDirectFloatBuffer(normals);
 		FloatBuffer textureBuffer = Buffers.newDirectFloatBuffer(texturePositions);
 
@@ -352,17 +351,25 @@ public class Terrain extends GameObject implements Drawable {
 		gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
 		gl.glVertexAttribPointer(0, 3, GL2.GL_FLOAT, false, 0, 0);
 
+		gl.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, vertexOrderBufferIndex);
+		gl.glBufferData(GL2.GL_ELEMENT_ARRAY_BUFFER, vertexOrders.length * 4, vertexOrderBuffer, GL2.GL_STATIC_DRAW);
+		gl.glIndexPointer(GL2.GL_INT, 0, null);
+		gl.glEnableClientState(GL2.GL_INDEX_ARRAY);
+		gl.glVertexAttribPointer(1, 3, GL2.GL_UNSIGNED_INT, false, 0, 0);
+
 		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, normalBufferIndex);
 		gl.glBufferData(GL2.GL_ARRAY_BUFFER, normals.length * 4, normalBuffer, GL2.GL_STATIC_DRAW);
 		gl.glNormalPointer(GL2.GL_FLOAT, 0, 0);
 		gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
-		gl.glVertexAttribPointer(1, 3, GL2.GL_FLOAT, false, 0, 0);
+		gl.glVertexAttribPointer(2, 3, GL2.GL_FLOAT, false, 0, 0);
 
 		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, textureBufferIndex);
 		gl.glBufferData(GL2.GL_ARRAY_BUFFER, texturePositions.length * 4, textureBuffer, GL2.GL_STATIC_DRAW);
 		gl.glTexCoordPointer(2, GL2.GL_FLOAT, 0, 0);
 		gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
-		gl.glVertexAttribPointer(2, 3, GL2.GL_FLOAT, false, 0, 0);
+		gl.glVertexAttribPointer(3, 3, GL2.GL_FLOAT, false, 0, 0);
+
+		vertexIndexBuffer = vertexOrderBufferIndex;
 	}
 
 	@Override
