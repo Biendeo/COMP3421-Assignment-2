@@ -11,41 +11,118 @@ public class PlayerController extends GameObject implements Updatable {
 	private double movementSpeed = 6.0;
 	private double turnSpeed = 120.0;
 
+	private boolean noClip;
+
 	/**
 	 * Constructs a player.
 	 * @param parent The parent GameObject.
 	 */
 	public PlayerController(GameObject parent) {
 		super(parent);
+		noClip = false;
 	}
 
 	@Override
 	public void update(double dt) {
-		double mainDirection = Math.cos(Math.toRadians(transform.rotation.y));
-		double sideDirection = Math.sin(Math.toRadians(transform.rotation.y));
-
 		if (Input.getKey(KeyEvent.VK_W) || Input.getKey(KeyEvent.VK_UP)) {
-			transform.position.addSelf(new Vector3(-sideDirection, 0.0, -mainDirection).multiplySelf(dt * movementSpeed));
+			if (noClip) {
+				moveForwardNoClip(dt * movementSpeed);
+			} else {
+				moveForward(dt * movementSpeed);
+			}
 		} else if (Input.getKey(KeyEvent.VK_S) || Input.getKey(KeyEvent.VK_DOWN)) {
-			transform.position.addSelf(new Vector3(-sideDirection, 0.0, -mainDirection).multiplySelf(-dt * movementSpeed));
+			if (noClip) {
+				moveBackwardNoClip(dt * movementSpeed);
+			} else {
+				moveBackward(dt * movementSpeed);
+			}
 		}
 
 		if (Input.getKey(KeyEvent.VK_A)) {
-			transform.position.addSelf(new Vector3(-mainDirection, 0.0, sideDirection).multiplySelf(dt * movementSpeed));
+			strafeLeft(dt * movementSpeed);
 		} else if (Input.getKey(KeyEvent.VK_D)) {
-			transform.position.addSelf(new Vector3(-mainDirection, 0.0, sideDirection).multiplySelf(-dt * movementSpeed));
+			strafeRight(dt * movementSpeed);
 		}
 
-		if (Input.getKey(KeyEvent.VK_R)) {
-			transform.position.addSelf(new Vector3(0.0, 1.0, 0.0).multiplySelf(dt * movementSpeed));
-		} else if (Input.getKey(KeyEvent.VK_F)) {
-			transform.position.addSelf(new Vector3(0.0, 1.0, 0.0).multiplySelf(-dt * movementSpeed));
+		if (noClip) {
+			if (Input.getKey(KeyEvent.VK_R)) {
+				flyUp(dt * movementSpeed);
+			} else if (Input.getKey(KeyEvent.VK_F)) {
+				flyDown(dt * movementSpeed);
+			}
 		}
 
 		if (Input.getKey(KeyEvent.VK_LEFT)) {
-			transform.rotation.addSelf(new Vector3(0.0, 1.0, 0.0).multiplySelf(dt * turnSpeed));
+			turnLeft(dt * turnSpeed);
 		} else if (Input.getKey(KeyEvent.VK_RIGHT)) {
-			transform.rotation.addSelf(new Vector3(0.0, 1.0, 0.0).multiplySelf(-dt * turnSpeed));
+			turnRight(dt * turnSpeed);
 		}
+
+		if (Input.getKeyDown(KeyEvent.VK_V)) {
+			toggleNoClip();
+		}
+
+		// TODO: Balance player on Terrain.
+	}
+
+	private void moveForward(double rate) {
+		double mainDirection = Math.cos(Math.toRadians(transform.rotation.y));
+		double sideDirection = Math.sin(Math.toRadians(transform.rotation.y));
+		transform.position.addSelf(new Vector3(-sideDirection, 0.0, -mainDirection).multiplySelf(rate));
+	}
+
+	private void moveBackward(double rate) {
+		moveForward(-rate);
+	}
+
+	private void moveForwardNoClip(double rate) {
+		double mainDirection = Math.cos(Math.toRadians(transform.rotation.y));
+		double sideDirection = Math.sin(Math.toRadians(transform.rotation.y));
+		// TODO: This needs to get the camera rotation.
+		double flyDirection = Math.sin(Math.toRadians(transform.rotation.z));
+		transform.position.addSelf(new Vector3(-sideDirection, 0.0, -mainDirection).multiplySelf(rate * (1 - Math.abs(flyDirection))));
+		transform.position.addSelf(new Vector3(0.0, flyDirection, 0.0).multiplySelf(rate));
+	}
+
+	private void moveBackwardNoClip(double rate) {
+		moveForwardNoClip(-rate);
+	}
+
+	private void strafeLeft(double rate) {
+		double mainDirection = Math.cos(Math.toRadians(transform.rotation.y));
+		double sideDirection = Math.sin(Math.toRadians(transform.rotation.y));
+		transform.position.addSelf(new Vector3(-mainDirection, 0.0, sideDirection).multiplySelf(rate));
+	}
+
+	private void strafeRight(double rate) {
+		strafeRight(-rate);
+	}
+
+	private void turnLeft(double rate) {
+		transform.rotation.addSelf(new Vector3(0.0, 1.0, 0.0).multiplySelf(rate));
+	}
+
+	private void turnRight(double rate) {
+		turnLeft(-rate);
+	}
+
+	private void lookUp(double rate) {
+		// TODO: This needs to move the camera, not the character.
+	}
+
+	private void lookDown(double rate) {
+		lookUp(-rate);
+	}
+
+	private void flyUp(double rate) {
+		transform.position.addSelf(new Vector3(0.0, 1.0, 0.0).multiplySelf(rate));
+	}
+
+	private void flyDown(double rate) {
+		flyUp(-rate);
+	}
+
+	private void toggleNoClip() {
+		noClip = !noClip;
 	}
 }
