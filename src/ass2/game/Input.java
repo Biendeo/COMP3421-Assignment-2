@@ -1,26 +1,46 @@
 package ass2.game;
 
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 
 /**
  * Handles input with a singleton design. Allows for a "get keyboard state" rather than implementing
  * listeners every time.
  */
-public class Input implements KeyListener {
+public class Input implements KeyListener, MouseListener, MouseMotionListener {
 	private static int keyCount = 256;
 	private static boolean[] previousKeyboardState = new boolean[keyCount];
 	private static boolean[] currentKeyboardState = new boolean[keyCount];
 	private static boolean[] futureKeyboardState = new boolean[keyCount];
 
+	private static int mouseButtonCount = 16;
+	private static boolean[] previousMouseState = new boolean[mouseButtonCount];
+	private static boolean[] currentMouseState = new boolean[mouseButtonCount];
+	private static boolean[] futureMouseState = new boolean[mouseButtonCount];
+
+	private static int previousMouseX = 0;
+	private static int previousMouseY = 0;
+	private static int currentMouseX = 0;
+	private static int currentMouseY = 0;
+	private static int futureMouseX = 0;
+	private static int futureMouseY = 0;
+
 	/**
 	 * Stores the pending keyboard state as the current one, and shifts that as the previous one.
 	 * This should be the first thing to be called when working with a new frame.
 	 */
-	public static void updateKeyboardState() {
+	public static void updateState() {
 		previousKeyboardState = currentKeyboardState;
 		currentKeyboardState = futureKeyboardState;
 		futureKeyboardState = currentKeyboardState.clone();
+		
+		previousMouseState = currentMouseState;
+		currentMouseState = futureMouseState;
+		futureMouseState = currentMouseState.clone();
+
+		previousMouseX = currentMouseX;
+		previousMouseY = currentMouseY;
+		currentMouseX = futureMouseX;
+		currentMouseY = futureMouseY;
 	}
 
 	/**
@@ -61,6 +81,60 @@ public class Input implements KeyListener {
 			return false;
 		}
 	}
+	/**
+	 * Returns whether the mouse button was pressed down this frame.
+	 * @param mouseButton The mouse button that was pressed.
+	 * @return Whether it was pressed down this frame.
+	 */
+	public static boolean getMouseButtonDown(int mouseButton) {
+		if (!previousMouseState[mouseButton] && currentMouseState[mouseButton]) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Returns whether a mouse button was released this frame.
+	 * @param mouseButton The mouse button that was released.
+	 * @return Whether it was released at this frame.
+	 */
+	public static boolean getMouseButtonUp(int mouseButton) {
+		if (previousMouseState[mouseButton] && !currentMouseState[mouseButton]) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Returns whether a mouse button is currently being held down.
+	 * @param mouseButton The mouse button that is being held down.
+	 * @return Whether it is being held down.
+	 */
+	public static boolean getMouseButton(int mouseButton) {
+		if (currentMouseState[mouseButton]) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static int getMouseX() {
+		return currentMouseX;
+	}
+
+	public static int getMouseY() {
+		return currentMouseY;
+	}
+
+	public static int getMouseDeltaX() {
+		return currentMouseX - previousMouseX;
+	}
+
+	public static int getMouseDeltaY() {
+		return currentMouseY - previousMouseY;
+	}
 
 	@Override
 	public void keyTyped(KeyEvent e) {
@@ -75,5 +149,41 @@ public class Input implements KeyListener {
 	@Override
 	public void keyReleased(KeyEvent e) {
 		futureKeyboardState[e.getKeyCode()] = false;
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		futureMouseState[e.getButton()] = true;
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		futureMouseState[e.getButton()] = false;
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+
+	}
+
+	@Override
+	public void mouseDragged(MouseEvent e) {
+
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		futureMouseX = e.getX();
+		futureMouseY = e.getY();
 	}
 }

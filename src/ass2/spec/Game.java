@@ -67,7 +67,10 @@ public class Game extends JFrame implements GLEventListener {
 		setVisible(true);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-		panel.addKeyListener(new Input());
+		Input input = new Input();
+		panel.addKeyListener(input);
+		panel.addMouseListener(input);
+		panel.addMouseMotionListener(input);
 	}
 
 	/**
@@ -98,7 +101,7 @@ public class Game extends JFrame implements GLEventListener {
 		myTime = time;
 
 		// Update the input.
-		Input.updateKeyboardState();
+		Input.updateState();
 
 		GameObject.ROOT.tryUpdate(dt);
 	}
