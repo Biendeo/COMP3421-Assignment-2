@@ -54,6 +54,18 @@ public class GameObject {
 		this.enabled = true;
 	}
 
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void toggleEnabled() {
+		enabled = !enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
 	/**
 	 * Deletes this GameObject and all of its children.
 	 */

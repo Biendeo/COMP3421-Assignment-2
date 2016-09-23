@@ -1,5 +1,6 @@
 package ass2.game;
 
+import java.awt.*;
 import java.awt.event.*;
 
 /**
@@ -23,6 +24,8 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener {
 	private static int currentMouseY = 0;
 	private static int futureMouseX = 0;
 	private static int futureMouseY = 0;
+
+	private static boolean mouseLock = false;
 
 	/**
 	 * Stores the pending keyboard state as the current one, and shifts that as the previous one.
@@ -134,6 +137,26 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener {
 
 	public static int getMouseDeltaY() {
 		return currentMouseY - previousMouseY;
+	}
+
+	public static boolean getMouseLock() {
+		return mouseLock;
+	}
+
+	public static void toggleMouseLock() {
+		mouseLock = !mouseLock;
+	}
+
+	public static void recenterMouse(int windowX, int windowY, int windowWidth, int windowHeight) {
+		Robot robot;
+		try {
+			robot = new Robot();
+		} catch (AWTException e) {
+			e.printStackTrace();
+			return;
+		}
+
+		robot.mouseMove(windowX + windowWidth / 2, windowY + windowHeight / 2);
 	}
 
 	@Override

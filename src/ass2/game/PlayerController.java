@@ -10,8 +10,14 @@ import java.awt.event.KeyEvent;
 public class PlayerController extends GameObject implements Updatable {
 	private double movementSpeed = 6.0;
 	private double turnSpeed = 120.0;
+	private double mouseSensitivityX = 120.0;
+	private double mouseSensitivityY = 120.0;
 
 	private boolean noClip;
+	private boolean mouseLook;
+
+	// This camera should be a child object to this player.
+	private Camera camera;
 
 	/**
 	 * Constructs a player.
@@ -20,6 +26,12 @@ public class PlayerController extends GameObject implements Updatable {
 	public PlayerController(GameObject parent) {
 		super(parent);
 		noClip = false;
+		mouseLook = Input.getMouseLock();
+		camera = null;
+	}
+
+	public void setCamera(Camera camera) {
+		this.camera = camera;
 	}
 
 	@Override
@@ -58,8 +70,23 @@ public class PlayerController extends GameObject implements Updatable {
 			turnRight(dt * turnSpeed);
 		}
 
+		turnRight(mouseSensitivityX * Input.getMouseDeltaX() / 100.0);
+		lookUp(mouseSensitivityY * Input.getMouseDeltaY() / 100.0);
+
+		System.out.println(Double.toString(camera.transform.rotation.x) + ", " + Double.toString(camera.transform.rotation.y) + ", " + Double.toString(camera.transform.rotation.z));
+
 		if (Input.getKeyDown(KeyEvent.VK_V)) {
 			toggleNoClip();
+		}
+
+		if (Input.getKeyDown(KeyEvent.VK_ALT)) {
+			System.out.println("ALT PRESSED");
+			Input.toggleMouseLock();
+			System.out.println("Mouse lock is: " + Boolean.toString(Input.getMouseLock()));
+		}
+
+		if (Input.getKeyDown(KeyEvent.VK_ESCAPE)) {
+			GameObject.ROOT.setEnabled(false);
 		}
 
 		// TODO: Balance player on Terrain.
@@ -78,8 +105,7 @@ public class PlayerController extends GameObject implements Updatable {
 	private void moveForwardNoClip(double rate) {
 		double mainDirection = Math.cos(Math.toRadians(transform.rotation.y));
 		double sideDirection = Math.sin(Math.toRadians(transform.rotation.y));
-		// TODO: This needs to get the camera rotation.
-		double flyDirection = Math.sin(Math.toRadians(transform.rotation.z));
+		double flyDirection = Math.sin(Math.toRadians(camera.transform.rotation.x));
 		transform.position.addSelf(new Vector3(-sideDirection, 0.0, -mainDirection).multiplySelf(rate * (1 - Math.abs(flyDirection))));
 		transform.position.addSelf(new Vector3(0.0, flyDirection, 0.0).multiplySelf(rate));
 	}
@@ -95,7 +121,7 @@ public class PlayerController extends GameObject implements Updatable {
 	}
 
 	private void strafeRight(double rate) {
-		strafeRight(-rate);
+		strafeLeft(-rate);
 	}
 
 	private void turnLeft(double rate) {
@@ -107,7 +133,14 @@ public class PlayerController extends GameObject implements Updatable {
 	}
 
 	private void lookUp(double rate) {
-		// TODO: This needs to move the camera, not the character.
+		if (camera != null) {
+			camera.transform.rotation.addSelf(new Vector3(-1.0, 0.0, 0.0).multiplySelf(rate));
+			if (camera.transform.rotation.x > 90.0) {
+				camera.transform.rotation.x = 90.0;
+			} else if (camera.transform.rotation.x < -90.0) {
+				camera.transform.rotation.x = -90.0;
+			}
+		}
 	}
 
 	private void lookDown(double rate) {

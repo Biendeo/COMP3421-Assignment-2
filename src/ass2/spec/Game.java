@@ -23,6 +23,8 @@ import com.jogamp.opengl.util.FPSAnimator;
  */
 public class Game extends JFrame implements GLEventListener {
 
+	private GLJPanel panel;
+
 	private long myTime;
 
 	private Terrain myTerrain;
@@ -54,7 +56,7 @@ public class Game extends JFrame implements GLEventListener {
 	public void run() {
 		GLProfile glp = GLProfile.getDefault();
 		GLCapabilities caps = new GLCapabilities(glp);
-		GLJPanel panel = new GLJPanel();
+		panel = new GLJPanel();
 		panel.addGLEventListener(this);
  
 		// Add an animator to call 'display' at 60fps
@@ -84,6 +86,7 @@ public class Game extends JFrame implements GLEventListener {
 		Game game = new Game(terrain);
 		PlayerController player = new PlayerController(GameObject.ROOT);
 		game.currentCamera = new Camera(player);
+		player.setCamera(game.currentCamera);
 		player.transform.position = new Vector3(-7.0, 3.0, 5.0);
 		player.transform.rotation = new Vector3(0.0, -90.0, 0.0);
 
@@ -95,6 +98,10 @@ public class Game extends JFrame implements GLEventListener {
 	 */
 	private void update() {
 
+		if (!GameObject.ROOT.isEnabled()) {
+			System.exit(0);
+		}
+
 		// compute the time since the last frame
 		long time = System.nanoTime();
 		double dt = (time - myTime) / 1000000000.0;
@@ -102,6 +109,10 @@ public class Game extends JFrame implements GLEventListener {
 
 		// Update the input.
 		Input.updateState();
+
+		if (Input.getMouseLock()) {
+			Input.recenterMouse(panel.getX(), panel.getY(), panel.getWidth(), panel.getHeight());
+		}
 
 		GameObject.ROOT.tryUpdate(dt);
 	}
