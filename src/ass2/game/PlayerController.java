@@ -36,6 +36,9 @@ public class PlayerController extends GameObject implements Updatable {
 
 	@Override
 	public void update(double dt) {
+		turnRight(mouseSensitivityX * Input.getMouseDeltaX() / 100.0);
+		lookUp(mouseSensitivityY * Input.getMouseDeltaY() / 100.0);
+
 		if (Input.getKey(KeyEvent.VK_W) || Input.getKey(KeyEvent.VK_UP)) {
 			if (noClip) {
 				moveForwardNoClip(dt * movementSpeed);
@@ -70,17 +73,15 @@ public class PlayerController extends GameObject implements Updatable {
 			turnRight(dt * turnSpeed);
 		}
 
-		turnRight(mouseSensitivityX * Input.getMouseDeltaX() / 100.0);
-		lookUp(mouseSensitivityY * Input.getMouseDeltaY() / 100.0);
-
 		System.out.println(Double.toString(camera.transform.rotation.x) + ", " + Double.toString(camera.transform.rotation.y) + ", " + Double.toString(camera.transform.rotation.z));
+		System.out.println(Double.toString(camera.getGlobalRotationVector().x) + ", " + Double.toString(camera.getGlobalRotationVector().y) + ", " + Double.toString(camera.getGlobalRotationVector().z));
 
 		if (Input.getKeyDown(KeyEvent.VK_V)) {
 			toggleNoClip();
+			System.out.println("Noclip is: " + Boolean.toString(noClip));
 		}
 
 		if (Input.getKeyDown(KeyEvent.VK_ALT)) {
-			System.out.println("ALT PRESSED");
 			Input.toggleMouseLock();
 			System.out.println("Mouse lock is: " + Boolean.toString(Input.getMouseLock()));
 		}
@@ -107,7 +108,7 @@ public class PlayerController extends GameObject implements Updatable {
 		double sideDirection = Math.sin(Math.toRadians(transform.rotation.y));
 		double flyDirection = Math.sin(Math.toRadians(camera.transform.rotation.x));
 		transform.position.addSelf(new Vector3(-sideDirection, 0.0, -mainDirection).multiplySelf(rate * (1 - Math.abs(flyDirection))));
-		transform.position.addSelf(new Vector3(0.0, flyDirection, 0.0).multiplySelf(rate));
+		transform.position.addSelf(new Vector3(0.0, -flyDirection, 0.0).multiplySelf(rate));
 	}
 
 	private void moveBackwardNoClip(double rate) {

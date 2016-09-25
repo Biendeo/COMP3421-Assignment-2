@@ -49,9 +49,9 @@ public class Camera extends GameObject {
 		Vector3 globalScale = getGlobalScaleVector();
 
 		gl.glScaled(1.0 / globalScale.x, 1.0 / globalScale.y, 1.0 / globalScale.z);
-		gl.glRotated(-globalRotate.z, 0.0, 0.0, 1.0);
-		gl.glRotated(-globalRotate.y, 0.0, 1.0, 0.0);
 		gl.glRotated(-globalRotate.x, 1.0, 0.0, 0.0);
+		gl.glRotated(-globalRotate.y, 0.0, 1.0, 0.0);
+		gl.glRotated(-globalRotate.z, 0.0, 0.0, 1.0);
 		gl.glTranslated(-globalTranslate.x, -globalTranslate.y, -globalTranslate.z);
 	}
 

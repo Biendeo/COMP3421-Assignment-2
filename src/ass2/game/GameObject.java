@@ -161,7 +161,7 @@ public class GameObject {
 			double[][] globalRotationMatrix = MathUtil.rotationMatrixXYZ(parent.getGlobalRotationVector());
 			double[][] rotationMatrix = MathUtil.rotationMatrixXYZ(transform.rotation.clone());
 
-			double[][] multipliedMatrix = MathUtil.multiply4(rotationMatrix, globalRotationMatrix);
+			double[][] multipliedMatrix = MathUtil.multiply4(globalRotationMatrix, rotationMatrix);
 
 			return MathUtil.rotationMatrixToVector(multipliedMatrix);
 		}
