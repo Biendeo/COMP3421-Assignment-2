@@ -26,7 +26,6 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener {
 	private static int futureMouseY = 0;
 
 	private static boolean mouseLock = false;
-	private static boolean detectMouse = true;
 
 	/**
 	 * Stores the pending keyboard state as the current one, and shifts that as the previous one.

@@ -26,7 +26,8 @@ public class PlayerController extends GameObject implements Updatable {
 	public PlayerController(GameObject parent) {
 		super(parent);
 		noClip = false;
-		mouseLook = Input.getMouseLock();
+		mouseLook = false;
+		// mouseLook = Input.getMouseLock();
 		camera = null;
 	}
 
@@ -36,8 +37,10 @@ public class PlayerController extends GameObject implements Updatable {
 
 	@Override
 	public void update(double dt) {
-		turnRight(mouseSensitivityX * Input.getMouseDeltaX() / 100.0);
-		lookUp(mouseSensitivityY * Input.getMouseDeltaY() / 100.0);
+		if (mouseLook) {
+			turnRight(mouseSensitivityX * Input.getMouseDeltaX() / 100.0);
+			lookDown(mouseSensitivityY * Input.getMouseDeltaY() / 100.0);
+		}
 
 		if (Input.getKey(KeyEvent.VK_W) || Input.getKey(KeyEvent.VK_UP)) {
 			if (noClip) {
@@ -73,24 +76,30 @@ public class PlayerController extends GameObject implements Updatable {
 			turnRight(dt * turnSpeed);
 		}
 
-		System.out.println(Double.toString(camera.transform.rotation.x) + ", " + Double.toString(camera.transform.rotation.y) + ", " + Double.toString(camera.transform.rotation.z));
-		System.out.println(Double.toString(camera.getGlobalRotationVector().x) + ", " + Double.toString(camera.getGlobalRotationVector().y) + ", " + Double.toString(camera.getGlobalRotationVector().z));
+		if (Input.getKey(KeyEvent.VK_T)) {
+			lookUp(dt * turnSpeed);
+		} else if (Input.getKey(KeyEvent.VK_G)) {
+			lookDown(dt * turnSpeed);
+		}
 
 		if (Input.getKeyDown(KeyEvent.VK_V)) {
 			toggleNoClip();
 			System.out.println("Noclip is: " + Boolean.toString(noClip));
 		}
 
-		if (Input.getKeyDown(KeyEvent.VK_ALT)) {
-			Input.toggleMouseLock();
-			System.out.println("Mouse lock is: " + Boolean.toString(Input.getMouseLock()));
+		if (Input.getKeyDown(KeyEvent.VK_M)) {
+			mouseLook = !mouseLook;
+			System.out.println("Mouse look is: " + Boolean.toString(mouseLook));
+
+			//Input.toggleMouseLock();
+			//System.out.println("Mouse lock is: " + Boolean.toString(Input.getMouseLock()));
 		}
 
 		if (Input.getKeyDown(KeyEvent.VK_ESCAPE)) {
 			GameObject.ROOT.setEnabled(false);
 		}
 
-		// TODO: Balance player on Terrain.
+		// TODO: Balance player on Terrain when noclip is off.
 	}
 
 	private void moveForward(double rate) {
@@ -108,7 +117,7 @@ public class PlayerController extends GameObject implements Updatable {
 		double sideDirection = Math.sin(Math.toRadians(transform.rotation.y));
 		double flyDirection = Math.sin(Math.toRadians(camera.transform.rotation.x));
 		transform.position.addSelf(new Vector3(-sideDirection, 0.0, -mainDirection).multiplySelf(rate * (1 - Math.abs(flyDirection))));
-		transform.position.addSelf(new Vector3(0.0, -flyDirection, 0.0).multiplySelf(rate));
+		transform.position.addSelf(new Vector3(0.0, flyDirection, 0.0).multiplySelf(rate));
 	}
 
 	private void moveBackwardNoClip(double rate) {
@@ -135,7 +144,7 @@ public class PlayerController extends GameObject implements Updatable {
 
 	private void lookUp(double rate) {
 		if (camera != null) {
-			camera.transform.rotation.addSelf(new Vector3(-1.0, 0.0, 0.0).multiplySelf(rate));
+			camera.transform.rotation.addSelf(new Vector3(1.0, 0.0, 0.0).multiplySelf(rate));
 			if (camera.transform.rotation.x > 90.0) {
 				camera.transform.rotation.x = 90.0;
 			} else if (camera.transform.rotation.x < -90.0) {
