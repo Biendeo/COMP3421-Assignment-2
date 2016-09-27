@@ -1,6 +1,8 @@
 {
   "width" : 10,
   "depth" : 10,
+  
+  "LSystemTreesGenerations" : 4,
 
   "sunlight" : [ -1, 1, 0 ],
 
@@ -39,5 +41,6 @@
       ]
     }
   ]
+  
 
 }

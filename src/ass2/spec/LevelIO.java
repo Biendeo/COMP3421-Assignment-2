@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 
+import ass2.game.LSystemTrees;
 import ass2.math.Vector3;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -36,6 +37,9 @@ public class LevelIO {
 		int width = jsonTerrain.getInt("width");
 		int depth = jsonTerrain.getInt("depth");
 		Terrain terrain = new Terrain(width, depth);
+		
+		int LSystemTreesGenerations = jsonTerrain.optInt("LSystemTreesGenerations", 4);
+		terrain.setTreeGens(LSystemTreesGenerations);
 
 		JSONArray jsonSun = jsonTerrain.getJSONArray("sunlight");
 		float dx = (float)jsonSun.getDouble(0);
@@ -109,7 +113,7 @@ public class LevelIO {
 		json.put("altitude", altitude);
 
 		JSONArray trees = new JSONArray();
-		for (Tree t : terrain.trees()) {
+		for (LSystemTrees t : terrain.trees()) {
 			JSONObject j = new JSONObject();
 			Vector3 position = t.getPosition();
 			j.put("x", position.x);

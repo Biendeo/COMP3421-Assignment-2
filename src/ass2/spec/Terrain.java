@@ -12,6 +12,7 @@ import java.util.List;
 
 import ass2.game.Drawable;
 import ass2.game.GameObject;
+import ass2.game.LSystemTrees;
 import ass2.game.Material;
 import ass2.game.Texture;
 import ass2.math.Vector3;
@@ -34,7 +35,8 @@ public class Terrain extends GameObject implements Drawable {
 
 	private Dimension mySize;
 	private double[][] myAltitude;
-	private List<Tree> myTrees;
+	private List<LSystemTrees> myTrees;
+	private int numTreeGens;
 	private List<Road> myRoads;
 	private Vector3f mySunlight;
 	private Material material;
@@ -50,7 +52,8 @@ public class Terrain extends GameObject implements Drawable {
 		super(GameObject.ROOT);
 		mySize = new Dimension(width, depth);
 		myAltitude = new double[width][depth];
-		myTrees = new ArrayList<Tree>();
+		myTrees = new ArrayList<LSystemTrees>();
+		numTreeGens = 4;
 		myRoads = new ArrayList<Road>();
 		mySunlight = new Vector3f();
 
@@ -71,7 +74,7 @@ public class Terrain extends GameObject implements Drawable {
 		return mySize;
 	}
 
-	public List<Tree> trees() {
+	public List<LSystemTrees> trees() {
 		return myTrees;
 	}
 
@@ -100,6 +103,10 @@ public class Terrain extends GameObject implements Drawable {
 
 	public void setSunlightDir(Vector3f delta) {
 		mySunlight = delta.clone();
+	}
+	
+	public void setTreeGens(int numTreeGens){
+		this.numTreeGens = numTreeGens;
 	}
 
 	public void setTexture(Texture texture) {
@@ -192,7 +199,7 @@ public class Terrain extends GameObject implements Drawable {
 	 */
 	public void addTree(double x, double z) {
 		double y = altitude(x, z);
-		Tree tree = new Tree(this, x, y, z);
+		LSystemTrees tree = new LSystemTrees(this, x, y, z, "fA", "^fB>>>B>>>>>B", "[^^f>>>>>>A]", numTreeGens);
 		myTrees.add(tree);
 	}
 
