@@ -5,10 +5,7 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import ass2.game.Drawable;
-import ass2.game.GameObject;
-import ass2.game.Material;
-import ass2.game.Texture;
+import ass2.game.*;
 import ass2.math.Vector3;
 import ass2.math.Vector3f;
 import ass2.math.Vector4f;
@@ -28,6 +25,7 @@ public class Terrain extends GameObject implements Drawable {
 	private double[][] myAltitude;
 	private List<Tree> myTrees;
 	private List<Road> myRoads;
+	private List<Portal> myPortals;
 	private Vector3f mySunlight;
 	private Material material;
 	private Texture texture;
@@ -47,6 +45,7 @@ public class Terrain extends GameObject implements Drawable {
 		myAltitude = new double[width][depth];
 		myTrees = new ArrayList<Tree>();
 		myRoads = new ArrayList<Road>();
+		myPortals = new ArrayList<Portal>();
 		mySunlight = new Vector3f();
 
 		material = new Material();
@@ -73,6 +72,10 @@ public class Terrain extends GameObject implements Drawable {
 
 	public List<Road> roads() {
 		return myRoads;
+	}
+
+	public List<Portal> portals() {
+		return myPortals;
 	}
 
 	public Vector3f getSunlight() {
@@ -202,6 +205,18 @@ public class Terrain extends GameObject implements Drawable {
 	public void addRoad(double width, double[] spine) {
 		Road road = new Road(width, spine);
 		myRoads.add(road);
+	}
+
+	public void addPortalPair(double portal1X, double portal1Z, double portal1Angle, double portal2X, double portal2Z, double portal2Angle, double width, double height) {
+		Portal portal1 = new Portal(this, width, height);
+		portal1.transform.position = new Vector3(portal1X, altitude(portal1X, portal1Z) + height / 2, portal1Z);
+		portal1.transform.rotation = new Vector3(0.0, portal1Angle, 0.0);
+		Portal portal2 = new Portal(this, width, height);
+		portal2.transform.position = new Vector3(portal2X, altitude(portal2X, portal2Z) + height / 2, portal2Z);
+		portal2.transform.rotation = new Vector3(0.0, portal2Angle, 0.0);
+		Portal.connectPortals(portal1, portal2);
+		myPortals.add(portal1);
+		myPortals.add(portal2);
 	}
 
 
