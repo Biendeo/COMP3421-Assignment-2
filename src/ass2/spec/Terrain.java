@@ -208,15 +208,21 @@ public class Terrain extends GameObject implements Drawable {
 	}
 
 	public void addPortalPair(double portal1X, double portal1Z, double portal1Angle, double portal2X, double portal2Z, double portal2Angle, double width, double height) {
-		Portal portal1 = new Portal(this, width, height);
+		Portal portal1 = new Portal(this, this, width, height);
 		portal1.transform.position = new Vector3(portal1X, altitude(portal1X, portal1Z) + height / 2, portal1Z);
 		portal1.transform.rotation = new Vector3(0.0, portal1Angle, 0.0);
-		Portal portal2 = new Portal(this, width, height);
+		Portal portal2 = new Portal(this, this, width, height);
 		portal2.transform.position = new Vector3(portal2X, altitude(portal2X, portal2Z) + height / 2, portal2Z);
 		portal2.transform.rotation = new Vector3(0.0, portal2Angle, 0.0);
 		Portal.connectPortals(portal1, portal2);
 		myPortals.add(portal1);
 		myPortals.add(portal2);
+	}
+
+	public void setPortalCamera(Camera camera) {
+		for (Portal portal : myPortals) {
+			portal.setActiveCamera(camera);
+		}
 	}
 
 

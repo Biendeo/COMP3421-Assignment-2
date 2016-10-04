@@ -114,6 +114,8 @@ public class Game extends JFrame implements GLEventListener {
 			Input.recenterMouse(panel.getX(), panel.getY(), panel.getWidth(), panel.getHeight());
 		}
 
+		myTerrain.setPortalCamera(currentCamera);
+
 		GameObject.ROOT.tryUpdate(dt);
 	}
 

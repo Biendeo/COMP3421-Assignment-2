@@ -38,8 +38,13 @@ public class Camera extends GameObject {
 		gl.glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
 
 		gl.glEnable(GL2.GL_DEPTH_TEST);
+		gl.glEnable(GL2.GL_STENCIL_TEST);
+
+		gl.glColorMask(true, true, true, true);
+		gl.glDepthMask(true);
 		gl.glClearDepth(farPlane);
-		gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
+		gl.glStencilMask(0xFF);
+		gl.glClear(GL2.GL_STENCIL_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT | GL2.GL_COLOR_BUFFER_BIT);
 
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glLoadIdentity();
