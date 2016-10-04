@@ -1,6 +1,7 @@
 package ass2.game;
 
 import ass2.math.Vector3;
+import ass2.spec.Terrain;
 
 import java.awt.event.KeyEvent;
 
@@ -13,18 +14,23 @@ public class PlayerController extends GameObject implements Updatable {
 	private double mouseSensitivityX = 120.0;
 	private double mouseSensitivityY = 120.0;
 
+	private double height = 1.0;
+
 	private boolean noClip;
 	private boolean mouseLook;
 
 	// This camera should be a child object to this player.
 	private Camera camera;
 
+	private Terrain terrain;
+
 	/**
 	 * Constructs a player.
 	 * @param parent The parent GameObject.
 	 */
-	public PlayerController(GameObject parent) {
+	public PlayerController(GameObject parent, Terrain terrain) {
 		super(parent);
+		this.terrain = terrain;
 		noClip = false;
 		mouseLook = false;
 		// mouseLook = Input.getMouseLock();
@@ -100,6 +106,9 @@ public class PlayerController extends GameObject implements Updatable {
 		}
 
 		// TODO: Balance player on Terrain when noclip is off.
+		if (!noClip) {
+			transform.position.y = terrain.altitude(transform.position.x, transform.position.z) + height;
+		}
 	}
 
 	private void moveForward(double rate) {
