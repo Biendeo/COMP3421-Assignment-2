@@ -54,6 +54,18 @@ public class GameObject {
 		this.enabled = true;
 	}
 
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void toggleEnabled() {
+		enabled = !enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
 	/**
 	 * Deletes this GameObject and all of its children.
 	 */
@@ -149,7 +161,7 @@ public class GameObject {
 			double[][] globalRotationMatrix = MathUtil.rotationMatrixXYZ(parent.getGlobalRotationVector());
 			double[][] rotationMatrix = MathUtil.rotationMatrixXYZ(transform.rotation.clone());
 
-			double[][] multipliedMatrix = MathUtil.multiply4(rotationMatrix, globalRotationMatrix);
+			double[][] multipliedMatrix = MathUtil.multiply4(globalRotationMatrix, rotationMatrix);
 
 			return MathUtil.rotationMatrixToVector(multipliedMatrix);
 		}
