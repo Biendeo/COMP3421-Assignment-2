@@ -84,7 +84,7 @@ public class Game extends JFrame implements GLEventListener {
 	public static void main(String[] args) throws FileNotFoundException {
 		Terrain terrain = LevelIO.load(new File(args[0]));
 		Game game = new Game(terrain);
-		PlayerController player = new PlayerController(GameObject.ROOT);
+		PlayerController player = new PlayerController(GameObject.ROOT, terrain);
 		game.currentCamera = new Camera(player);
 		player.setCamera(game.currentCamera);
 		player.transform.position = new Vector3(-7.0, 3.0, 5.0);
