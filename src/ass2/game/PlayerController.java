@@ -2,22 +2,26 @@ package ass2.game;
 
 import ass2.math.Vector3;
 import ass2.spec.Terrain;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.util.gl2.GLUT;
 
 import java.awt.event.KeyEvent;
 
 /**
  * Handles the player character's input and appearance.
  */
-public class PlayerController extends GameObject implements Updatable {
+public class PlayerController extends GameObject implements Updatable, Drawable {
 	private double movementSpeed = 6.0;
 	private double turnSpeed = 120.0;
 	private double mouseSensitivityX = 120.0;
 	private double mouseSensitivityY = 120.0;
 
 	private double height = 1.0;
+	private double cameraDistance = 3.0;
 
 	private boolean noClip;
 	private boolean mouseLook;
+	private boolean thirdPerson;
 
 	// This camera should be a child object to this player.
 	private Camera camera;
@@ -33,6 +37,7 @@ public class PlayerController extends GameObject implements Updatable {
 		this.terrain = terrain;
 		noClip = false;
 		mouseLook = false;
+		thirdPerson = false;
 		// mouseLook = Input.getMouseLock();
 		camera = null;
 	}
@@ -88,6 +93,10 @@ public class PlayerController extends GameObject implements Updatable {
 			lookDown(dt * turnSpeed);
 		}
 
+		if (thirdPerson) {
+			positionThirdPersonCamera();
+		}
+
 		if (Input.getKeyDown(KeyEvent.VK_V)) {
 			toggleNoClip();
 			System.out.println("Noclip is: " + Boolean.toString(noClip));
@@ -101,11 +110,15 @@ public class PlayerController extends GameObject implements Updatable {
 			//System.out.println("Mouse lock is: " + Boolean.toString(Input.getMouseLock()));
 		}
 
+		if (Input.getKeyDown(KeyEvent.VK_COMMA)) {
+			toggleThirdPerson();
+			System.out.println("Third person is: " + Boolean.toString(thirdPerson));
+		}
+
 		if (Input.getKeyDown(KeyEvent.VK_ESCAPE)) {
 			GameObject.ROOT.setEnabled(false);
 		}
 
-		// TODO: Balance player on Terrain when noclip is off.
 		if (!noClip) {
 			transform.position.y = terrain.altitude(transform.position.x, transform.position.z) + height;
 		}
@@ -176,5 +189,42 @@ public class PlayerController extends GameObject implements Updatable {
 
 	private void toggleNoClip() {
 		noClip = !noClip;
+	}
+
+	private void toggleThirdPerson() {
+		thirdPerson = !thirdPerson;
+		if (!thirdPerson) {
+			camera.transform.position = new Vector3(0.0, 0.0, 0.0);
+		} else {
+			positionThirdPersonCamera();
+		}
+	}
+
+	private void positionThirdPersonCamera() {
+		double angleRads = Math.toRadians(camera.transform.rotation.x);
+
+		double cameraHeight = -Math.sin(angleRads);
+		double cameraHorizontalDistance = Math.abs(Math.cos(angleRads));
+
+		camera.transform.position = new Vector3(0.0, cameraHeight, cameraHorizontalDistance).multiply(cameraDistance);
+	}
+
+	@Override
+	public void initialize(GL2 gl) {
+
+	}
+
+	@Override
+	public void dispose(GL2 gl) {
+
+	}
+
+	@Override
+	public void draw(GL2 gl) {
+		// TODO: Work this with the portals.
+		if (thirdPerson) {
+			GLUT glut = new GLUT();
+			glut.glutSolidTeapot(1.0);
+		}
 	}
 }
