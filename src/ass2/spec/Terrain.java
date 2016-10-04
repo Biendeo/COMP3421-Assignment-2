@@ -5,10 +5,7 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import ass2.game.Drawable;
-import ass2.game.GameObject;
-import ass2.game.Material;
-import ass2.game.Texture;
+import ass2.game.*;
 import ass2.math.Vector3;
 import ass2.math.Vector3f;
 import ass2.math.Vector4f;
@@ -28,6 +25,7 @@ public class Terrain extends GameObject implements Drawable {
 	private double[][] myAltitude;
 	private List<Tree> myTrees;
 	private List<Road> myRoads;
+	private List<Portal> myPortals;
 	private Vector3f mySunlight;
 	private Material material;
 	private Texture texture;
@@ -47,6 +45,7 @@ public class Terrain extends GameObject implements Drawable {
 		myAltitude = new double[width][depth];
 		myTrees = new ArrayList<Tree>();
 		myRoads = new ArrayList<Road>();
+		myPortals = new ArrayList<Portal>();
 		mySunlight = new Vector3f();
 
 		material = new Material();
@@ -73,6 +72,10 @@ public class Terrain extends GameObject implements Drawable {
 
 	public List<Road> roads() {
 		return myRoads;
+	}
+
+	public List<Portal> portals() {
+		return myPortals;
 	}
 
 	public Vector3f getSunlight() {
@@ -148,35 +151,52 @@ public class Terrain extends GameObject implements Drawable {
 	 * Get the altitude at an arbitrary point.
 	 * Non-integer points should be interpolated from neighbouring grid points
 	 *
-	 * TO BE COMPLETED
-	 *
 	 * @param x
 	 * @param z
 	 * @return
 	 */
 	public double altitude(double x, double z) {
-		double altitude = 0.0;
-
-		boolean integerX = false;
-		boolean integerZ = false;
-		int x1 = 0;
-		int x2 = 0;
-		int z1 = 0;
-		int z2 = 0;
-
-		if ((x < 0 || x > mySize.width || z < 0 || z > mySize.height)) {
-			return altitude;
+		// If the object is outside the boundaries, we just say it's 0.
+		if ((x < 0 || x > mySize.width - 1 || z < 0 || z > mySize.height - 1)) {
+			return 0.0;
 		}
 
-		x1 = (int)Math.floor(x);
-		x2 = (int)Math.ceil(x);
-		z1 = (int)Math.floor(z);
-		z2 = (int)Math.ceil(z);
+		int floorX = (int)Math.floor(x);
+		int floorZ = (int)Math.floor(z);
 
-		// TODO: This is not correct, it just floors the value.
-		altitude = myAltitude[x1][z1];
+		// If we've landed on a vertex, we just use the value because it's quicker.
+		if (x == floorX && z == floorZ) {
+			return myAltitude[floorX][floorZ];
+		}
 
-		return altitude;
+		// This determines whether the top-right triangle is used.
+		// TODO: Double check that this works, I'm noticing some jumpy motion sometimes.
+		boolean alternateTriangle = false;
+		if (x + z > 1.0) {
+			alternateTriangle = true;
+		}
+
+		// This method is called barycentric coordinates.
+		// Source: http://www.alecjacobson.com/weblog/?p=1596
+
+		// We start by getting the vertex positions.
+		Vector3 vertex1;
+		if (alternateTriangle) {
+			vertex1 = new Vector3(floorX + 1, myAltitude[floorX + 1][floorZ + 1], floorZ + 1);
+		} else {
+			vertex1 = new Vector3(floorX, myAltitude[floorX][floorZ], floorZ);
+		}
+		Vector3 vertex2 = new Vector3(floorX + 1, myAltitude[floorX + 1][floorZ], floorZ);
+		Vector3 vertex3 = new Vector3(floorX, myAltitude[floorX][floorZ + 1], floorZ + 1);
+
+		// Then we chuck in the formula, and out pops what we want.
+		double determinant = (vertex2.z - vertex3.z) * (vertex1.x - vertex3.x) + (vertex3.x - vertex2.x) * (vertex1.z - vertex3.z);
+
+		double l1 = ((vertex2.z - vertex3.z) * (x - vertex3.x) + (vertex3.x - vertex2.x) * (z - vertex3.z)) / determinant;
+		double l2 = ((vertex3.z - vertex1.z) * (x - vertex3.x) + (vertex1.x - vertex3.x) * (z - vertex3.z)) / determinant;
+		double l3 = 1.0 - l1 - l2;
+
+		return l1 * vertex1.y + l2 * vertex2.y + l3 * vertex3.y;
 	}
 
 	/**
@@ -202,6 +222,18 @@ public class Terrain extends GameObject implements Drawable {
 	public void addRoad(double width, double[] spine) {
 		Road road = new Road(width, spine);
 		myRoads.add(road);
+	}
+
+	public void addPortalPair(double portal1X, double portal1Z, double portal1Angle, double portal2X, double portal2Z, double portal2Angle, double width, double height) {
+		Portal portal1 = new Portal(this, width, height);
+		portal1.transform.position = new Vector3(portal1X, altitude(portal1X, portal1Z) + height / 2, portal1Z);
+		portal1.transform.rotation = new Vector3(0.0, portal1Angle, 0.0);
+		Portal portal2 = new Portal(this, width, height);
+		portal2.transform.position = new Vector3(portal2X, altitude(portal2X, portal2Z) + height / 2, portal2Z);
+		portal2.transform.rotation = new Vector3(0.0, portal2Angle, 0.0);
+		Portal.connectPortals(portal1, portal2);
+		myPortals.add(portal1);
+		myPortals.add(portal2);
 	}
 
 

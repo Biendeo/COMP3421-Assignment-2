@@ -77,6 +77,28 @@ public class LevelIO {
 				terrain.addRoad(w, spine);
 			}
 		}
+
+		if (jsonTerrain.has("portals")) {
+			JSONArray jsonPortals = jsonTerrain.getJSONArray("portals");
+			for (int i = 0; i < jsonPortals.length(); i++) {
+				JSONObject jsonPortalPair = jsonPortals.getJSONObject(i);
+
+				JSONObject jsonPortal1 = jsonPortalPair.getJSONObject("end1");
+				double portal1X = jsonPortal1.getDouble("x");
+				double portal1Z = jsonPortal1.getDouble("z");
+				double portal1Angle = jsonPortal1.getDouble("angle");
+
+				JSONObject jsonPortal2 = jsonPortalPair.getJSONObject("end2");
+				double portal2X = jsonPortal2.getDouble("x");
+				double portal2Z = jsonPortal2.getDouble("z");
+				double portal2Angle = jsonPortal2.getDouble("angle");
+
+				double portalWidth = jsonPortalPair.getDouble("width");
+				double portalHeight = jsonPortalPair.getDouble("height");
+
+				terrain.addPortalPair(portal1X, portal1Z, portal1Angle, portal2X, portal2Z, portal2Angle, portalWidth, portalHeight);
+			}
+		}
 		return terrain;
 	}
 
