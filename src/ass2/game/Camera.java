@@ -37,6 +37,8 @@ public class Camera extends GameObject {
 		// This is mostly copied from my assignment 1.
 		gl.glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
 
+		gl.glEnable(GL2.GL_CULL_FACE);
+
 		gl.glEnable(GL2.GL_DEPTH_TEST);
 		gl.glEnable(GL2.GL_STENCIL_TEST);
 

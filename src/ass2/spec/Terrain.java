@@ -329,13 +329,13 @@ public class Terrain extends GameObject implements Drawable {
 				vertices[((x * mySize.height) + z) * 18 + 7] = (float)bottomRight.y;
 				vertices[((x * mySize.height) + z) * 18 + 8] = (float)bottomRight.z;
 
-				vertices[((x * mySize.height) + z) * 18 + 9] = (float)topRight.x;
-				vertices[((x * mySize.height) + z) * 18 + 10] = (float)topRight.y;
-				vertices[((x * mySize.height) + z) * 18 + 11] = (float)topRight.z;
+				vertices[((x * mySize.height) + z) * 18 + 9] = (float)topLeft.x;
+				vertices[((x * mySize.height) + z) * 18 + 10] = (float)topLeft.y;
+				vertices[((x * mySize.height) + z) * 18 + 11] = (float)topLeft.z;
 
-				vertices[((x * mySize.height) + z) * 18 + 12] = (float)topLeft.x;
-				vertices[((x * mySize.height) + z) * 18 + 13] = (float)topLeft.y;
-				vertices[((x * mySize.height) + z) * 18 + 14] = (float)topLeft.z;
+				vertices[((x * mySize.height) + z) * 18 + 12] = (float)topRight.x;
+				vertices[((x * mySize.height) + z) * 18 + 13] = (float)topRight.y;
+				vertices[((x * mySize.height) + z) * 18 + 14] = (float)topRight.z;
 
 				vertices[((x * mySize.height) + z) * 18 + 15] = (float)bottomRight.x;
 				vertices[((x * mySize.height) + z) * 18 + 16] = (float)bottomRight.y;
