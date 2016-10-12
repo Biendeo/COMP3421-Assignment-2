@@ -67,17 +67,22 @@ public class Portal extends GameObject implements Drawable {
 		} else {
 			++currentPortalViewDepth;
 
-			gl.glStencilFunc(GL2.GL_ALWAYS, 0x1, 0x1);
-			gl.glStencilOp(GL2.GL_REPLACE, GL2.GL_REPLACE, GL2.GL_REPLACE);
+			gl.glDisable(GL2.GL_LIGHTING);
+
+			// This draws the portal to the stencil buffer.
+			gl.glStencilFunc(GL2.GL_ALWAYS, 0x1, 0xFF);
+			gl.glStencilOp(GL2.GL_KEEP, GL2.GL_KEEP, GL2.GL_REPLACE);
 			gl.glColorMask(false, false, false, false);
-			gl.glStencilMask(0x01);
+			gl.glStencilMask(0xFF);
 			gl.glBegin(GL2.GL_TRIANGLE_STRIP);
 			gl.glVertex3d(-width / 2, height / 2, 0.0);
 			gl.glVertex3d(-width / 2, -height / 2, 0.0);
 			gl.glVertex3d(width / 2, height / 2, 0.0);
 			gl.glVertex3d(width / 2, -height / 2, 0.0);
 			gl.glEnd();
-			gl.glStencilFunc(GL2.GL_NOTEQUAL, 0x1, 0x1);
+
+			// This triangle should not draw where the portal is.
+			gl.glStencilFunc(GL2.GL_NOTEQUAL, 0x1, 0xFF);
 			gl.glStencilOp(GL2.GL_KEEP, GL2.GL_KEEP, GL2.GL_KEEP);
 			gl.glColorMask(true, true, true, true);
 			gl.glStencilMask(0x00);
@@ -88,6 +93,18 @@ public class Portal extends GameObject implements Drawable {
 			gl.glVertex3d(5.0, -5.0, -1.0);
 			gl.glVertex3d(0.0, 5.0, -1.0);
 			gl.glEnd();
+
+			// This triangle should only be drawn where the portal is.
+			gl.glStencilFunc(GL2.GL_EQUAL, 0x1, 0xFF);
+			gl.glColor3d(0.0, 1.0, 1.0);
+			gl.glBegin(GL2.GL_TRIANGLES);
+			gl.glNormal3d(0.0, 0.0, 1.0);
+			gl.glVertex3d(5.0, 5.0, -2.0);
+			gl.glVertex3d(-5.0, 5.0, -2.0);
+			gl.glVertex3d(0.0, -5.0, -2.0);
+			gl.glEnd();
+
+			gl.glEnable(GL2.GL_LIGHTING);
 
 
 

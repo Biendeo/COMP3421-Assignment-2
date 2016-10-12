@@ -47,6 +47,8 @@ public class Camera extends GameObject {
 		gl.glDepthMask(true);
 		gl.glClearDepth(farPlane);
 		gl.glStencilMask(0xFF);
+		gl.glStencilFunc(GL2.GL_ALWAYS, 0x00, 0x00);
+		gl.glStencilOp(GL2.GL_KEEP, GL2.GL_KEEP, GL2.GL_KEEP);
 		gl.glClear(GL2.GL_STENCIL_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT | GL2.GL_COLOR_BUFFER_BIT);
 
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
