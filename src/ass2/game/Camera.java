@@ -36,6 +36,7 @@ public class Camera extends GameObject {
 	public void setView(GL2 gl) {
 		// This is mostly copied from my assignment 1.
 		gl.glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
+		gl.glClearStencil(0x00);
 
 		gl.glEnable(GL2.GL_CULL_FACE);
 

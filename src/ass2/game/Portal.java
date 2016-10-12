@@ -67,8 +67,32 @@ public class Portal extends GameObject implements Drawable {
 		} else {
 			++currentPortalViewDepth;
 
+			gl.glStencilFunc(GL2.GL_ALWAYS, 0x1, 0x1);
+			gl.glStencilOp(GL2.GL_REPLACE, GL2.GL_REPLACE, GL2.GL_REPLACE);
 			gl.glColorMask(false, false, false, false);
-			gl.glDepthMask(false);
+			gl.glStencilMask(0x01);
+			gl.glBegin(GL2.GL_TRIANGLE_STRIP);
+			gl.glVertex3d(-width / 2, height / 2, 0.0);
+			gl.glVertex3d(-width / 2, -height / 2, 0.0);
+			gl.glVertex3d(width / 2, height / 2, 0.0);
+			gl.glVertex3d(width / 2, -height / 2, 0.0);
+			gl.glEnd();
+			gl.glStencilFunc(GL2.GL_NOTEQUAL, 0x1, 0x1);
+			gl.glStencilOp(GL2.GL_KEEP, GL2.GL_KEEP, GL2.GL_KEEP);
+			gl.glColorMask(true, true, true, true);
+			gl.glStencilMask(0x00);
+			gl.glColor3d(1.0, 0.0, 1.0);
+			gl.glBegin(GL2.GL_TRIANGLES);
+			gl.glNormal3d(0.0, 0.0, 1.0);
+			gl.glVertex3d(-5.0, -5.0, -1.0);
+			gl.glVertex3d(5.0, -5.0, -1.0);
+			gl.glVertex3d(0.0, 5.0, -1.0);
+			gl.glEnd();
+
+
+
+			/*
+			gl.glColorMask(false, false, false, false);
 
 			gl.glStencilFunc(GL2.GL_ALWAYS, 1, 0xFF);
 			gl.glStencilOp(GL2.GL_KEEP, GL2.GL_KEEP, GL2.GL_REPLACE);
@@ -111,6 +135,7 @@ public class Portal extends GameObject implements Drawable {
 			terrain.setPortalCamera(oldCamera);
 
 			gl.glPopMatrix();
+			*/
 
 			--currentPortalViewDepth;
 		}
