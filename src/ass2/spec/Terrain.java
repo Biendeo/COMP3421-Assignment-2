@@ -276,7 +276,8 @@ public class Terrain extends GameObject implements Drawable {
 
 	@Override
 	public void initialize(GL2 gl) {
-		texture = new Texture(gl, "src/ass2/textures/grass01.jpg", true);
+		//texture = new Texture(gl, "res/textures/grass01.jpg", true);
+		texture = new Texture(gl, getClass().getResourceAsStream("/textures/grass01.jpg"), true);
 
 		int[] vertexArray = new int[1];
 		gl.glGenVertexArrays(1, vertexArray, 0);
