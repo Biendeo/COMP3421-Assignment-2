@@ -11,6 +11,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 /**
@@ -32,21 +33,21 @@ public class Texture {
 		mipMapEnabled = mipmaps;
 		TextureData data = null;
 		try {
-			 File file = new File(fileName);
-			 BufferedImage img = ImageIO.read(file); // read file into BufferedImage
-			 ImageUtil.flipImageVertically(img);
+			File file = new File(fileName);
+			BufferedImage img = ImageIO.read(file); // read file into BufferedImage
+			ImageUtil.flipImageVertically(img);
 
-			 //This library will result in different formats being upside down.
-		    //data = TextureIO.newTextureData(GLProfile.getDefault(), file, false,extension);
+			//This library will result in different formats being upside down.
+			//data = TextureIO.newTextureData(GLProfile.getDefault(), file, false,extension);
 
-			 //This library call flips all images the same way
+			//This library call flips all images the same way
 			data = AWTTextureIO.newTextureData(GLProfile.getDefault(), img, false);
 
 		} catch (IOException exc) {
 			System.err.println(fileName);
-            exc.printStackTrace();
-            System.exit(1);
-        }
+			exc.printStackTrace();
+			System.exit(1);
+		}
 
 		gl.glGenTextures(1, textureID, 0);
 		//The first time bind is called with the given id,
@@ -54,17 +55,56 @@ public class Texture {
 		//It also makes it the current texture.
 		gl.glBindTexture(GL.GL_TEXTURE_2D, textureID[0]);
 
-		 // Build texture initialised with image data.
-        gl.glTexImage2D(GL.GL_TEXTURE_2D, 0,
-        				data.getInternalFormat(),
-        				data.getWidth(),
-        				data.getHeight(),
-        				0,
-        				data.getPixelFormat(),
-        				data.getPixelType(),
-        				data.getBuffer());
+		// Build texture initialised with image data.
+		gl.glTexImage2D(GL.GL_TEXTURE_2D, 0,
+				data.getInternalFormat(),
+				data.getWidth(),
+				data.getHeight(),
+				0,
+				data.getPixelFormat(),
+				data.getPixelType(),
+				data.getBuffer());
 
-        setFilters(gl);
+		setFilters(gl);
+
+	}
+
+	// TODO: Remove copy-paste.
+	public Texture(GL2 gl, InputStream fileStream, boolean mipmaps) {
+		mipMapEnabled = mipmaps;
+		TextureData data = null;
+		try {
+			BufferedImage img = ImageIO.read(fileStream); // read file into BufferedImage
+			ImageUtil.flipImageVertically(img);
+
+			//This library will result in different formats being upside down.
+			//data = TextureIO.newTextureData(GLProfile.getDefault(), file, false,extension);
+
+			//This library call flips all images the same way
+			data = AWTTextureIO.newTextureData(GLProfile.getDefault(), img, false);
+
+		} catch (IOException exc) {
+			exc.printStackTrace();
+			System.exit(1);
+		}
+
+		gl.glGenTextures(1, textureID, 0);
+		//The first time bind is called with the given id,
+		//an openGL texture object is created and bound to the id
+		//It also makes it the current texture.
+		gl.glBindTexture(GL.GL_TEXTURE_2D, textureID[0]);
+
+		// Build texture initialised with image data.
+		gl.glTexImage2D(GL.GL_TEXTURE_2D, 0,
+				data.getInternalFormat(),
+				data.getWidth(),
+				data.getHeight(),
+				0,
+				data.getPixelFormat(),
+				data.getPixelType(),
+				data.getBuffer());
+
+		setFilters(gl);
 
 	}
 
