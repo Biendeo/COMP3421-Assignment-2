@@ -3,6 +3,7 @@ package ass2.game;
 import ass2.math.Vector3;
 import ass2.spec.Terrain;
 import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.util.gl2.GLUT;
 
 /**
  * A portal object that sits in the world.
@@ -68,12 +69,17 @@ public class Portal extends GameObject implements Drawable {
 			++currentPortalViewDepth;
 
 			gl.glDisable(GL2.GL_LIGHTING);
+			gl.glEnable(GL2.GL_STENCIL_TEST);
 
 			// This draws the portal to the stencil buffer.
-			gl.glStencilFunc(GL2.GL_ALWAYS, 0x1, 0xFF);
-			gl.glStencilOp(GL2.GL_KEEP, GL2.GL_KEEP, GL2.GL_REPLACE);
-			gl.glColorMask(false, false, false, false);
+			gl.glColor4d(1.0, 1.0, 1.0, 0.3);
 			gl.glStencilMask(0xFF);
+			gl.glStencilFunc(GL2.GL_NEVER, 0, 0xFF);
+			gl.glStencilOp(GL2.GL_INCR, GL2.GL_KEEP, GL2.GL_KEEP);
+			gl.glEnable(GL2.GL_BLEND);
+			gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+			gl.glColorMask(true, true, true, true);
+			gl.glDepthMask(false);
 			gl.glBegin(GL2.GL_TRIANGLE_STRIP);
 			gl.glVertex3d(-width / 2, height / 2, 0.0);
 			gl.glVertex3d(-width / 2, -height / 2, 0.0);
@@ -81,11 +87,16 @@ public class Portal extends GameObject implements Drawable {
 			gl.glVertex3d(width / 2, -height / 2, 0.0);
 			gl.glEnd();
 
+			gl.glColorMask(true, true, true, true);
+			gl.glDepthMask(true);
+			gl.glStencilMask(0x00);
+
 			// This triangle should not draw where the portal is.
-			gl.glStencilFunc(GL2.GL_NOTEQUAL, 0x1, 0xFF);
+			gl.glStencilMask(0x00);
+			gl.glStencilFunc(GL2.GL_LEQUAL, 1, 0xFF);
 			gl.glStencilOp(GL2.GL_KEEP, GL2.GL_KEEP, GL2.GL_KEEP);
 			gl.glColorMask(true, true, true, true);
-			gl.glStencilMask(0x00);
+			gl.glDepthMask(true);
 			gl.glColor3d(1.0, 0.0, 1.0);
 			gl.glBegin(GL2.GL_TRIANGLES);
 			gl.glNormal3d(0.0, 0.0, 1.0);
@@ -95,7 +106,7 @@ public class Portal extends GameObject implements Drawable {
 			gl.glEnd();
 
 			// This triangle should only be drawn where the portal is.
-			gl.glStencilFunc(GL2.GL_EQUAL, 0x1, 0xFF);
+			gl.glStencilFunc(GL2.GL_NOTEQUAL, 1, 0xFF);
 			gl.glColor3d(0.0, 1.0, 1.0);
 			gl.glBegin(GL2.GL_TRIANGLES);
 			gl.glNormal3d(0.0, 0.0, 1.0);
@@ -105,6 +116,8 @@ public class Portal extends GameObject implements Drawable {
 			gl.glEnd();
 
 			gl.glEnable(GL2.GL_LIGHTING);
+			gl.glDisable(GL2.GL_BLEND);
+			gl.glDisable(GL2.GL_STENCIL_TEST);
 
 
 

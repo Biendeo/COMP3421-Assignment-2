@@ -50,7 +50,7 @@
       "end2" : {
         "x" : 2,
         "z" : 5,
-        "angle" : 90
+        "angle" : -90
       },
       "width" : 2,
       "height" : 3
