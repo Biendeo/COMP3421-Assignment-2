@@ -28,6 +28,7 @@ public class Terrain extends GameObject implements Drawable {
 	private int numTreeGens;
 	private List<Road> myRoads;
 	private List<Portal> myPortals;
+	private List<Monster> myMonsters;
 	private Vector3f mySunlight;
 	private Material material;
 	private Texture texture;
@@ -49,6 +50,7 @@ public class Terrain extends GameObject implements Drawable {
 		numTreeGens = 4;
 		myRoads = new ArrayList<Road>();
 		myPortals = new ArrayList<Portal>();
+		myMonsters = new ArrayList<Monster>();
 		mySunlight = new Vector3f();
 
 		material = new Material();
@@ -79,6 +81,10 @@ public class Terrain extends GameObject implements Drawable {
 
 	public List<Portal> portals() {
 		return myPortals;
+	}
+
+	public List<Monster> monsters() {
+		return myMonsters;
 	}
 
 	public Vector3f getSunlight() {
@@ -241,6 +247,11 @@ public class Terrain extends GameObject implements Drawable {
 		Portal.connectPortals(portal1, portal2);
 		myPortals.add(portal1);
 		myPortals.add(portal2);
+	}
+
+	public void addMonster(List<Vector3> path, double speed) {
+		Monster monster = new Monster(this, this, path, speed);
+		myMonsters.add(monster);
 	}
 
 	public void setPortalCamera(Camera camera) {
