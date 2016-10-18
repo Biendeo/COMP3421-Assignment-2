@@ -1,10 +1,14 @@
 package ass2.game;
 
 import ass2.math.Vector3;
+import ass2.math.Vector4f;
 import ass2.spec.Terrain;
+import com.jogamp.common.nio.Buffers;
+import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.util.gl2.GLUT;
 
+import java.io.*;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +19,7 @@ public class Monster extends GameObject implements Drawable, Updatable {
 
 	private Terrain terrain;
 
-	private static final double height = 1.0;
+	private static final double height = 0.05;
 
 	private double pathLength;
 
@@ -23,12 +27,21 @@ public class Monster extends GameObject implements Drawable, Updatable {
 	private double speed;
 	private int currentIndex;
 
+	private Texture texture;
+
+	private int vaoIndex;
+	private int vertexCount;
+
+	private Material material;
+
 	public Monster(GameObject parent, Terrain terrain, List<Vector3> path, double speed) {
 		super(parent);
 		this.terrain = terrain;
 		setMonsterMovementPattern(path, speed);
 		transform.position = new Vector3(path.get(0).x, 0.0, path.get(0).z);
 		transform.position.y = terrain.altitude(transform.position.x, transform.position.z);
+		material = new Material();
+		material.diffuse = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	/**
@@ -88,6 +101,7 @@ public class Monster extends GameObject implements Drawable, Updatable {
 
 		// TODO: Figure out if that's actually facing the right direction.
 		transform.rotation.y = Math.toDegrees(Math.tan(movementVector.z / movementVector.x));
+		System.out.println(transform.rotation.y);
 	}
 
 	private void moveTowardsNextPoint(double amount) {
@@ -118,17 +132,190 @@ public class Monster extends GameObject implements Drawable, Updatable {
 
 	@Override
 	public void initialize(GL2 gl) {
+		texture = new Texture(gl, getClass().getResourceAsStream("/models/cat/cat_diff.jpg"), true);
+
+		int[] vertexArray = new int[1];
+		gl.glGenVertexArrays(1, vertexArray, 0);
+		vaoIndex = vertexArray[0];
+
+		int[] buffers = new int[3];
+		gl.glGenBuffers(3, buffers, 0);
+
+		int vertexBufferIndex = buffers[0];
+		int normalBufferIndex = buffers[1];
+		int textureBufferIndex = buffers[2];
+
+		// Format:
+		// [x1, y1, z1, x2, y2, z2, ... ]
+		// Vertices are added by z-row.
+		ArrayList<Float> vertices = new ArrayList<>();
+
+		// Format:
+		// [x1, y1, z1, x2, y2, z2, ... ]
+		// The +0 face is added, then the +1 face. This is then added by z-row.
+		ArrayList<Float> normals = new ArrayList<>();
+
+		// Format:
+		// [0, 1, 2, 3, 1, 2, ... ]
+		// The +0 face is added, then the +1 face. This is then added by z-row.
+		ArrayList<Float> texturePositions = new ArrayList<>();
+
+		ArrayList<Float> vertexFinal = new ArrayList<>();
+		ArrayList<Float> normalFinal = new ArrayList<>();
+		ArrayList<Float> textureFinal = new ArrayList<>();
+
+		BufferedReader modelFile = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/models/cat/cat.obj")));
+
+		try {
+			for (String line = modelFile.readLine(); line != null; line = modelFile.readLine()) {
+				String[] lineSplit = line.split(" ");
+				switch(lineSplit[0]) {
+					case "v":
+						vertices.add(Float.parseFloat(lineSplit[1]));
+						vertices.add(Float.parseFloat(lineSplit[2]));
+						vertices.add(Float.parseFloat(lineSplit[3]));
+						break;
+					case "vt":
+						texturePositions.add(Float.parseFloat(lineSplit[1]));
+						texturePositions.add(Float.parseFloat(lineSplit[2]));
+						break;
+					case "vn":
+						normals.add(Float.parseFloat(lineSplit[1]));
+						normals.add(Float.parseFloat(lineSplit[2]));
+						normals.add(Float.parseFloat(lineSplit[3]));
+						break;
+					case "f":
+						String[] vertex1 = lineSplit[1].split("/");
+						String[] vertex2 = lineSplit[2].split("/");
+						String[] vertex3 = lineSplit[3].split("/");
+
+						vertexFinal.add(vertices.get((Integer.parseInt(vertex1[0]) - 1) * 3));
+						vertexFinal.add(vertices.get((Integer.parseInt(vertex1[0]) - 1) * 3 + 1));
+						vertexFinal.add(vertices.get((Integer.parseInt(vertex1[0]) - 1) * 3 + 2));
+
+						textureFinal.add(texturePositions.get((Integer.parseInt(vertex1[1]) - 1) * 2));
+						textureFinal.add(texturePositions.get((Integer.parseInt(vertex1[1]) - 1) * 2 + 1));
+
+						normalFinal.add(normals.get((Integer.parseInt(vertex1[2]) - 1) * 3));
+						normalFinal.add(normals.get((Integer.parseInt(vertex1[2]) - 1) * 3 + 1));
+						normalFinal.add(normals.get((Integer.parseInt(vertex1[2]) - 1) * 3 + 2));
+
+						vertexFinal.add(vertices.get((Integer.parseInt(vertex2[0]) - 1) * 3));
+						vertexFinal.add(vertices.get((Integer.parseInt(vertex2[0]) - 1) * 3 + 1));
+						vertexFinal.add(vertices.get((Integer.parseInt(vertex2[0]) - 1) * 3 + 2));
+
+						textureFinal.add(texturePositions.get((Integer.parseInt(vertex2[1]) - 1) * 2));
+						textureFinal.add(texturePositions.get((Integer.parseInt(vertex2[1]) - 1) * 2 + 1));
+
+						normalFinal.add(normals.get((Integer.parseInt(vertex2[2]) - 1) * 3));
+						normalFinal.add(normals.get((Integer.parseInt(vertex2[2]) - 1) * 3 + 1));
+						normalFinal.add(normals.get((Integer.parseInt(vertex2[2]) - 1) * 3 + 2));
+
+						vertexFinal.add(vertices.get((Integer.parseInt(vertex3[0]) - 1) * 3));
+						vertexFinal.add(vertices.get((Integer.parseInt(vertex3[0]) - 1) * 3 + 1));
+						vertexFinal.add(vertices.get((Integer.parseInt(vertex3[0]) - 1) * 3 + 2));
+
+						textureFinal.add(texturePositions.get((Integer.parseInt(vertex3[1]) - 1) * 2));
+						textureFinal.add(texturePositions.get((Integer.parseInt(vertex3[1]) - 1) * 2 + 1));
+
+						normalFinal.add(normals.get((Integer.parseInt(vertex3[2]) - 1) * 3));
+						normalFinal.add(normals.get((Integer.parseInt(vertex3[2]) - 1) * 3 + 1));
+						normalFinal.add(normals.get((Integer.parseInt(vertex3[2]) - 1) * 3 + 2));
+
+						break;
+					case "mtllib":
+						break;
+				}
+			}
+
+			modelFile.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		float[] vertexArr = new float[vertexFinal.size()];
+
+		for (int i = 0; i < vertexArr.length; ++i) {
+			vertexArr[i] = vertexFinal.get(i);
+		}
+
+		vertexCount = vertexArr.length;
+
+		float[] normalArr = new float[normalFinal.size()];
+
+		for (int i = 0; i < normalArr.length; ++i) {
+			normalArr[i] = normalFinal.get(i);
+		}
+
+		float[] textureArr = new float[textureFinal.size()];
+
+		for (int i = 0; i < textureArr.length; ++i) {
+			textureArr[i] = textureFinal.get(i);
+		}
+
+		FloatBuffer vertexBuffer = Buffers.newDirectFloatBuffer(vertexArr);
+		FloatBuffer normalBuffer = Buffers.newDirectFloatBuffer(normalArr);
+		FloatBuffer textureBuffer = Buffers.newDirectFloatBuffer(textureArr);
+
+		gl.glBindVertexArray(vaoIndex);
+
+		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, vertexBufferIndex);
+		gl.glBufferData(GL2.GL_ARRAY_BUFFER, vertexArr.length * 4, vertexBuffer, GL2.GL_STATIC_DRAW);
+		gl.glVertexPointer(3, GL2.GL_FLOAT, 0, 0);
+		gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+		gl.glVertexAttribPointer(0, 3, GL2.GL_FLOAT, false, 0, 0);
+
+		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, normalBufferIndex);
+		gl.glBufferData(GL2.GL_ARRAY_BUFFER, normalArr.length * 4, normalBuffer, GL2.GL_STATIC_DRAW);
+		gl.glNormalPointer(GL2.GL_FLOAT, 0, 0);
+		gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
+		gl.glVertexAttribPointer(1, 3, GL2.GL_FLOAT, false, 0, 0);
+
+		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, textureBufferIndex);
+		gl.glBufferData(GL2.GL_ARRAY_BUFFER, textureArr.length * 4, textureBuffer, GL2.GL_STATIC_DRAW);
+		gl.glTexCoordPointer(2, GL2.GL_FLOAT, 0, 0);
+		gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
+		gl.glVertexAttribPointer(2, 3, GL2.GL_FLOAT, false, 0, 0);
 
 	}
 
 	@Override
 	public void dispose(GL2 gl) {
+		texture.release(gl);
 
+		int[] vaoArray = new int[1];
+		vaoArray[0] = vaoIndex;
+		gl.glDeleteVertexArrays(1, vaoArray, 0);
 	}
 
 	@Override
 	public void draw(GL2 gl) {
-		GLUT glut = new GLUT();
-		glut.glutSolidSphere(height / 2, 8, 8);
+		// The texture should only be enabled by this object.
+		gl.glEnable(GL2.GL_TEXTURE_2D);
+
+		gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2.GL_FILL);
+
+		gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
+		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
+		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE);
+
+		gl.glBindTexture(GL2.GL_TEXTURE_2D, texture.getTextureId());
+
+		//gl.glColor3d(0.0, 0.0, 0.0);
+		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT, new float[]{material.ambient.x, material.ambient.y, material.ambient.z}, 0);
+		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, new float[]{material.diffuse.x, material.diffuse.y, material.diffuse.z}, 0);
+		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, new float[]{material.specular.x, material.specular.y, material.specular.z}, 0);
+		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SHININESS, new float[]{material.phong.x, material.phong.y, material.phong.z}, 0);
+
+		gl.glBindVertexArray(vaoIndex);
+		gl.glEnableVertexAttribArray(0);
+		gl.glEnableVertexAttribArray(1);
+		// I'm not too sure why disabling this works but enabling doesn't.
+		//gl.glEnableVertexAttribArray(2);
+
+		gl.glDrawArrays(GL2.GL_TRIANGLES, 0, vertexCount);
+
+		gl.glBindVertexArray(0);
+		gl.glDisable(GL2.GL_TEXTURE_2D);
 	}
 }
