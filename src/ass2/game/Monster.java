@@ -37,6 +37,10 @@ public class Monster extends GameObject implements Drawable, Updatable {
 
 	private Material material;
 
+	private Shader fragmentShader;
+	private Shader vertexShader;
+	private int shaderProgram;
+
 	public Monster(GameObject parent, Terrain terrain, List<Vector3> path, double speed) {
 		super(parent);
 		this.terrain = terrain;
@@ -142,6 +146,11 @@ public class Monster extends GameObject implements Drawable, Updatable {
 
 	@Override
 	public void initialize(GL2 gl) {
+		try {
+			shaderProgram = Shader.initShaders(gl, getClass().getResourceAsStream("/shaders/cat_vert.glsl"), getClass().getResourceAsStream("/shaders/cat_frag.glsl"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		diffuseTexture = new Texture(gl, getClass().getResourceAsStream("/models/cat/cat_diff.jpg"), true);
 		normalTexture = new Texture(gl, getClass().getResourceAsStream("/models/cat/cat_norm.jpg"), true);
 		specularTexture = new Texture(gl, getClass().getResourceAsStream("/models/cat/cat_spec.jpg"), true);
@@ -307,6 +316,8 @@ public class Monster extends GameObject implements Drawable, Updatable {
 		// The texture should only be enabled by this object.
 		gl.glEnable(GL2.GL_TEXTURE_2D);
 
+		gl.glUseProgram(shaderProgram);
+
 		gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2.GL_FILL);
 
 		gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
@@ -330,6 +341,7 @@ public class Monster extends GameObject implements Drawable, Updatable {
 		gl.glDrawArrays(GL2.GL_TRIANGLES, 0, vertexCount);
 
 		gl.glBindVertexArray(0);
+		gl.glUseProgram(0);
 		gl.glDisable(GL2.GL_TEXTURE_2D);
 	}
 }
