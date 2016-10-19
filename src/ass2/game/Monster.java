@@ -7,7 +7,6 @@ import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 
-import java.awt.event.KeyEvent;
 import java.io.*;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -36,9 +35,6 @@ public class Monster extends GameObject implements Drawable, Updatable {
 	private int vertexCount;
 
 	private Material material;
-
-	private Shader fragmentShader;
-	private Shader vertexShader;
 	private int shaderProgram;
 
 	public Monster(GameObject parent, Terrain terrain, List<Vector3> path, double speed) {
