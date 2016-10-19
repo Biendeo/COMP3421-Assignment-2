@@ -1,60 +1,48 @@
 #version 130
 
+uniform sampler2D diffuseTexture;
+uniform sampler2D normalTexture;
+uniform sampler2D specularTexture;
+
+// New bumpmapping
+varying vec3 lightVec;
+varying vec3 halfVec;
+varying vec3 eyeVec;
 
 
-in vec3 N;
-in vec4 v;
+void main() {
 
-/* We are only taking into consideration light0 and assuming it is a point light */
-void main (void) {
-   vec4 ambient, globalAmbient;
+    // lookup normal from normal map, move from [0,1] to  [-1, 1] range, normalize
+    vec3 normal = 2.0 * texture2D (normalTexture, gl_TexCoord[0].st).rgb - 1.0;
+    normal = normalize (normal);
 
-    /* Compute the ambient and globalAmbient terms */
-	ambient =  gl_LightSource[0].ambient * gl_FrontMaterial.ambient;
-	globalAmbient = gl_LightModel.ambient * gl_FrontMaterial.ambient;
+    // compute diffuse lighting
+    float lamberFactor= max (dot (lightVec, normal), 0.0) ;
+    vec4 diffuseMaterial = vec4(0.0);
+    vec4 diffuseLight  = vec4(0.0);
 
+    // compute specular lighting
+    vec4 specularMaterial ;
+    vec4 specularLight ;
+    float shininess ;
 
-	/* Diffuse calculations */
+    // compute ambient
+    vec4 ambientLight = gl_LightSource[0].ambient;
 
-	vec3 normal, lightDir;
+    if (lamberFactor > 0.0) {
+        diffuseMaterial = texture2D (diffuseTexture, gl_TexCoord[0].st);
+        diffuseLight  = gl_LightSource[0].diffuse;
 
-	vec4 diffuse;
-	float NdotL;
+        // In doom3, specular value comes from a texture
+        specularMaterial =  vec4(1.0)  ;
+        specularLight = gl_LightSource[0].specular;
+        shininess = pow (max (dot (halfVec, normal), 0.0), 2.0)  ;
 
-	/* normal has been interpolated and may no longer be unit length so we need to normalise*/
-	normal = normalize(N);
+        gl_FragColor =	diffuseMaterial * diffuseLight * lamberFactor ;
+        gl_FragColor +=	specularMaterial * specularLight * shininess ;
 
+    }
 
-	/* normalize the light's direction. */
-	lightDir = normalize(vec3(gl_LightSource[0].position - v));
-    NdotL = max(dot(normal, lightDir), 0.0);
-    /* Compute the diffuse term */
-     diffuse = NdotL * gl_FrontMaterial.diffuse * gl_LightSource[0].diffuse;
-
-    vec4 specular = vec4(0.0,0.0,0.0,1);
-    float NdotHV;
-    float NdotRV;
-    vec3 dirToView = normalize(vec3(-v));
-
-    //Reflect takes vector from light
-    vec3 R = normalize(reflect(-lightDir,normal));
-    vec3 H =  normalize(lightDir+dirToView);
-
-    /* compute the specular term if NdotL is  larger than zero */
-
-	if (NdotL > 0.0) {
-	    NdotHV = max(dot(normal, H),0.0);
-	    //Can use the reflection vector instead if you wish
-		//NdotRV = max(dot(R,dirToView ),0.0);
-
-		specular = gl_FrontMaterial.specular * gl_LightSource[0].specular * pow(NdotHV,gl_FrontMaterial.shininess);
-	    //specular = gl_FrontMaterial.specular * gl_LightSource[0].specular * pow(NdotRV,gl_FrontMaterial.shininess);
-	}
-
-
-    gl_FragColor = gl_FrontMaterial.emission + globalAmbient + ambient + diffuse + specular;
-
-
+    gl_FragColor +=	ambientLight;
 
 }
-

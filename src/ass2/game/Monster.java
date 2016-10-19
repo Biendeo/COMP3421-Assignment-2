@@ -6,6 +6,7 @@ import ass2.spec.Terrain;
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL4;
 
 import java.io.*;
 import java.nio.FloatBuffer;
@@ -320,8 +321,6 @@ public class Monster extends GameObject implements Drawable, Updatable {
 		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
 		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE);
 
-		gl.glBindTexture(GL2.GL_TEXTURE_2D, diffuseTexture.getTextureId());
-
 		//gl.glColor3d(0.0, 0.0, 0.0);
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT, new float[]{material.ambient.x, material.ambient.y, material.ambient.z}, 0);
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, new float[]{material.diffuse.x, material.diffuse.y, material.diffuse.z}, 0);
@@ -334,8 +333,32 @@ public class Monster extends GameObject implements Drawable, Updatable {
 		// I'm not too sure why disabling this works but enabling doesn't.
 		//gl.glEnableVertexAttribArray(2);
 
+		GL4 gl4 = gl.getGL4();
+
+		int diffuseTextureLoc = gl4.glGetUniformLocation(shaderProgram, "diffuseTexture");
+		int normalTextureLoc = gl4.glGetUniformLocation(shaderProgram, "normalTexture");
+		int specularTextureLoc = gl4.glGetUniformLocation(shaderProgram, "specularTexture");
+
+		gl.glUniform1i(diffuseTextureLoc, 0);
+		gl.glUniform1i(normalTextureLoc, 2);
+		gl.glUniform1i(specularTextureLoc, 4);
+
+		gl.glActiveTexture(GL2.GL_TEXTURE0);
+		gl.glBindTexture(GL2.GL_TEXTURE_2D, diffuseTexture.getTextureId());
+		gl.glActiveTexture(GL2.GL_TEXTURE0 + 2);
+		gl.glBindTexture(GL2.GL_TEXTURE_2D, normalTexture.getTextureId());
+		gl.glActiveTexture(GL2.GL_TEXTURE0 + 4);
+		gl.glBindTexture(GL2.GL_TEXTURE_2D, specularTexture.getTextureId());
+
 		gl.glDrawArrays(GL2.GL_TRIANGLES, 0, vertexCount);
 
+		gl.glActiveTexture(GL2.GL_TEXTURE0);
+		gl.glBindTexture(GL2.GL_TEXTURE_2D, 0);
+		gl.glActiveTexture(GL2.GL_TEXTURE0 + 2);
+		gl.glBindTexture(GL2.GL_TEXTURE_2D, 0);
+		gl.glActiveTexture(GL2.GL_TEXTURE0 + 4);
+		gl.glBindTexture(GL2.GL_TEXTURE_2D, 0);
+		gl.glActiveTexture(GL2.GL_TEXTURE0);
 		gl.glBindVertexArray(0);
 		gl.glUseProgram(0);
 		gl.glDisable(GL2.GL_TEXTURE_2D);
