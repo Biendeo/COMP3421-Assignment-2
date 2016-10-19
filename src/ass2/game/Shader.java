@@ -1,11 +1,6 @@
 package ass2.game;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
+import java.io.*;
 
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2ES2;
@@ -35,6 +30,25 @@ public class Shader {
 		myType = type;
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader( new FileInputStream(sourceFile)));
+			StringWriter writer = new StringWriter();
+			mySource = new String[1];
+			String line = reader.readLine();
+			while (line != null) {
+				writer.write(line);
+				writer.write("\n");
+				line = reader.readLine();
+			}
+			reader.close();
+			mySource[0] = writer.getBuffer().toString();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public Shader(int type, InputStream fileStream) throws IOException {
+		myType = type;
+		try {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(fileStream));
 			StringWriter writer = new StringWriter();
 			mySource = new String[1];
 			String line = reader.readLine();

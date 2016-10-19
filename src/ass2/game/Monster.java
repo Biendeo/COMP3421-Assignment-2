@@ -7,6 +7,7 @@ import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 
+import java.awt.event.KeyEvent;
 import java.io.*;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -27,7 +28,9 @@ public class Monster extends GameObject implements Drawable, Updatable {
 	private double speed;
 	private int currentIndex;
 
-	private Texture texture;
+	private Texture diffuseTexture;
+	private Texture normalTexture;
+	private Texture specularTexture;
 
 	private int vaoIndex;
 	private int vertexCount;
@@ -100,8 +103,15 @@ public class Monster extends GameObject implements Drawable, Updatable {
 		Vector3 movementVector = vectorToNextPoint();
 
 		// TODO: Figure out if that's actually facing the right direction.
-		transform.rotation.y = Math.toDegrees(Math.tan(movementVector.z / movementVector.x));
-		System.out.println(transform.rotation.y);
+		//System.out.println(Double.toString(movementVector.x) + ", " + Double.toString(movementVector.y) + ", " + Double.toString(movementVector.z));
+		transform.rotation.y = Math.toDegrees(Math.atan(movementVector.x / movementVector.z));
+		//System.out.println(transform.rotation.y);
+		if (Double.isNaN(transform.rotation.y)) {
+			transform.rotation.y = 0;
+		}
+		if (movementVector.z < 0) {
+			transform.rotation.y += 180.0;
+		}
 	}
 
 	private void moveTowardsNextPoint(double amount) {
@@ -132,7 +142,9 @@ public class Monster extends GameObject implements Drawable, Updatable {
 
 	@Override
 	public void initialize(GL2 gl) {
-		texture = new Texture(gl, getClass().getResourceAsStream("/models/cat/cat_diff.jpg"), true);
+		diffuseTexture = new Texture(gl, getClass().getResourceAsStream("/models/cat/cat_diff.jpg"), true);
+		normalTexture = new Texture(gl, getClass().getResourceAsStream("/models/cat/cat_norm.jpg"), true);
+		specularTexture = new Texture(gl, getClass().getResourceAsStream("/models/cat/cat_spec.jpg"), true);
 
 		int[] vertexArray = new int[1];
 		gl.glGenVertexArrays(1, vertexArray, 0);
@@ -281,7 +293,9 @@ public class Monster extends GameObject implements Drawable, Updatable {
 
 	@Override
 	public void dispose(GL2 gl) {
-		texture.release(gl);
+		diffuseTexture.release(gl);
+		normalTexture.release(gl);
+		specularTexture.release(gl);
 
 		int[] vaoArray = new int[1];
 		vaoArray[0] = vaoIndex;
@@ -299,7 +313,7 @@ public class Monster extends GameObject implements Drawable, Updatable {
 		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
 		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE);
 
-		gl.glBindTexture(GL2.GL_TEXTURE_2D, texture.getTextureId());
+		gl.glBindTexture(GL2.GL_TEXTURE_2D, diffuseTexture.getTextureId());
 
 		//gl.glColor3d(0.0, 0.0, 0.0);
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT, new float[]{material.ambient.x, material.ambient.y, material.ambient.z}, 0);
