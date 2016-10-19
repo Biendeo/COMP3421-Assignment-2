@@ -387,9 +387,9 @@ public class Terrain extends GameObject implements Drawable {
 				texturePositions[((x * mySize.height) + z) * 12 + 4] = 1.0f;
 				texturePositions[((x * mySize.height) + z) * 12 + 5] = 0.0f;
 
-				texturePositions[((x * mySize.height) + z) * 12 + 6] = 1.0f;
+				texturePositions[((x * mySize.height) + z) * 12 + 6] = 0.0f;
 				texturePositions[((x * mySize.height) + z) * 12 + 7] = 1.0f;
-				texturePositions[((x * mySize.height) + z) * 12 + 8] = 0.0f;
+				texturePositions[((x * mySize.height) + z) * 12 + 8] = 1.0f;
 				texturePositions[((x * mySize.height) + z) * 12 + 9] = 1.0f;
 				texturePositions[((x * mySize.height) + z) * 12 + 10] = 1.0f;
 				texturePositions[((x * mySize.height) + z) * 12 + 11] = 0.0f;
