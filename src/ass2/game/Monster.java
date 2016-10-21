@@ -333,11 +333,9 @@ public class Monster extends GameObject implements Drawable, Updatable {
 		// I'm not too sure why disabling this works but enabling doesn't.
 		//gl.glEnableVertexAttribArray(2);
 
-		GL4 gl4 = gl.getGL4();
-
-		int diffuseTextureLoc = gl4.glGetUniformLocation(shaderProgram, "diffuseTexture");
-		int normalTextureLoc = gl4.glGetUniformLocation(shaderProgram, "normalTexture");
-		int specularTextureLoc = gl4.glGetUniformLocation(shaderProgram, "specularTexture");
+		int diffuseTextureLoc = gl.glGetUniformLocation(shaderProgram, "diffuseTexture");
+		int normalTextureLoc = gl.glGetUniformLocation(shaderProgram, "normalTexture");
+		int specularTextureLoc = gl.glGetUniformLocation(shaderProgram, "specularTexture");
 
 		gl.glUniform1i(diffuseTextureLoc, 0);
 		gl.glUniform1i(normalTextureLoc, 2);
