@@ -36,20 +36,10 @@ public class Camera extends GameObject {
 	public void setView(GL2 gl) {
 		// This is mostly copied from my assignment 1.
 		gl.glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
-		gl.glClearStencil(0x00);
-
-		gl.glEnable(GL2.GL_CULL_FACE);
 
 		gl.glEnable(GL2.GL_DEPTH_TEST);
-		gl.glEnable(GL2.GL_STENCIL_TEST);
-
-		gl.glColorMask(true, true, true, true);
-		gl.glDepthMask(true);
 		gl.glClearDepth(farPlane);
-		gl.glStencilMask(0x00);
-		gl.glStencilFunc(GL2.GL_EQUAL, 0x00, 0x00);
-		gl.glStencilOp(GL2.GL_KEEP, GL2.GL_KEEP, GL2.GL_KEEP);
-		gl.glClear(GL2.GL_STENCIL_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT | GL2.GL_COLOR_BUFFER_BIT);
+		gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glLoadIdentity();
