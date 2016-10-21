@@ -1,6 +1,5 @@
 package ass2.game;
 
-import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.glu.GLUquadric;
@@ -16,7 +15,6 @@ public class LSystemTrees extends GameObject implements Drawable {
 	private int numGenerations;
 	
 	private String generatedString;
-	private Texture treeTexture;
 	
 	private Material material;
 	
@@ -30,7 +28,7 @@ public class LSystemTrees extends GameObject implements Drawable {
 		
 		this.transform.position = new Vector3(x, y, z);
 		material = new Material();
-		material.diffuse = new Vector4f(.5f, 0.35f, 0.05f, 0.0f);
+		material.diffuse = new Vector4f(0.5f, 0.35f, 0.05f, 0.0f);
 	}
 	
 	private String generateString(){
@@ -61,26 +59,20 @@ public class LSystemTrees extends GameObject implements Drawable {
 		double currentBranchRadius = initialBranchRadius - branchRadiusReduction*branchDepth;
 		
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
-		//gl.glEnable(GL2.GL_TEXTURE_2D);
 		gl.glPushMatrix();
 		gl.glRotated(-90, 1, 0, 0);
         GLU glu = new GLU();
         GLUquadric quadric = glu.gluNewQuadric();
         
-        //gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2.GL_FILL);
-		//gl.glColor3f(0, 0, 0);
-		//gl.glBindTexture(GL2.GL_TEXTURE_2D, treeTexture.getTextureId());
+		gl.glColor3d(0.0, 0.0, 0.0);
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT, new float[]{material.ambient.x, material.ambient.y, material.ambient.z}, 0);
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, new float[]{material.diffuse.x, material.diffuse.y, material.diffuse.z}, 0);
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, new float[]{material.specular.x, material.specular.y, material.specular.z}, 0);
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SHININESS, new float[]{material.phong.x, material.phong.y, material.phong.z}, 0);
-		//gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
-		//gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
-		//gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
-		//gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);;
-		glu.gluCylinder(quadric, currentBranchRadius, currentBranchRadius, branchLength, 7, 7);
-		//gl.glBindTexture(GL2.GL_TEXTURE_2D, treeTexture.getTextureId());
-		//gl.glDisable(GL2.GL_TEXTURE_2D);
+        
+        
+        
+		glu.gluCylinder(quadric, currentBranchRadius, currentBranchRadius, branchLength, 32, 32);
 		
 
 		//glu.gluDeleteQuadric(quadric); //I think these need to be deleted after use????
@@ -93,7 +85,6 @@ public class LSystemTrees extends GameObject implements Drawable {
 	@Override
 	public void initialize(GL2 gl) {
 		// TODO Auto-generated method stub
-		this.treeTexture = new Texture(gl, "src/ass2/textures/treeTexture.bmp", true);
 		
 	}
 

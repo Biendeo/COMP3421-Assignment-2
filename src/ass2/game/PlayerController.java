@@ -224,7 +224,10 @@ public class PlayerController extends GameObject implements Updatable, Drawable 
 		// TODO: Work this with the portals.
 		if (thirdPerson) {
 			GLUT glut = new GLUT();
+			// The teapot uses the wrong face order.
+			gl.glDisable(GL2.GL_CULL_FACE);
 			glut.glutSolidTeapot(1.0);
+			gl.glEnable(GL2.GL_CULL_FACE);
 		}
 	}
 }
