@@ -56,6 +56,7 @@ public class Game extends JFrame implements GLEventListener {
 	public void run() {
 		GLProfile glp = GLProfile.getDefault();
 		GLCapabilities caps = new GLCapabilities(glp);
+		caps.setStencilBits(8);
 		panel = new GLJPanel();
 		panel.addGLEventListener(this);
  
@@ -113,6 +114,8 @@ public class Game extends JFrame implements GLEventListener {
 		if (Input.getMouseLock()) {
 			Input.recenterMouse(panel.getX(), panel.getY(), panel.getWidth(), panel.getHeight());
 		}
+
+		myTerrain.setPortalCamera(currentCamera);
 
 		GameObject.ROOT.tryUpdate(dt);
 	}
