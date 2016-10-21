@@ -233,7 +233,8 @@ public class Terrain extends GameObject implements Drawable {
 	 * @param spine
 	 */
 	public void addRoad(double width, double[] spine) {
-		Road road = new Road(width, spine);
+		double y = altitude(spine[0], spine[1]);
+		Road road = new Road(width, spine, y);
 		myRoads.add(road);
 	}
 
