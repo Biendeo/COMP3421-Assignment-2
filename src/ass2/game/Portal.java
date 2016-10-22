@@ -48,6 +48,14 @@ public class Portal extends GameObject implements Drawable {
 
 	}
 
+	public double getWidth() {
+		return width;
+	}
+
+	public double getHeight() {
+		return height;
+	}
+
 	public void setActiveCamera(Camera camera) {
 		activeCamera = camera;
 	}
@@ -91,6 +99,7 @@ public class Portal extends GameObject implements Drawable {
 			gl.glDepthMask(true);
 			gl.glStencilMask(0x00);
 
+			/*
 			// This triangle should not draw where the portal is.
 			gl.glStencilMask(0x00);
 			gl.glStencilFunc(GL2.GL_LEQUAL, 1, 0xFF);
@@ -114,6 +123,7 @@ public class Portal extends GameObject implements Drawable {
 			gl.glVertex3d(-5.0, 5.0, -2.0);
 			gl.glVertex3d(0.0, -5.0, -2.0);
 			gl.glEnd();
+			*/
 
 			gl.glEnable(GL2.GL_LIGHTING);
 			gl.glDisable(GL2.GL_BLEND);

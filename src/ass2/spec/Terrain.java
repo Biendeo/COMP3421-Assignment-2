@@ -260,6 +260,82 @@ public class Terrain extends GameObject implements Drawable {
 		}
 	}
 
+	/**
+	 * Determines whether an object should be moved through a portal, and does it.
+	 * @param object The object in question.
+	 * @param previousPosition The global position of the object before.
+	 */
+	public void moveObjectThroughPortal(GameObject object, Vector3 previousPosition) {
+		Vector3 futurePosition = object.getGlobalPositionVector();
+		Vector3 vectorDifference = futurePosition.subtract(previousPosition);
+		vectorDifference.divideSelf(vectorDifference.x);
+
+		for (Portal p : myPortals) {
+			Vector3 leftPoint = p.transform.position.clone();
+			Vector3 rightPoint = p.transform.position.clone();
+			leftPoint.addSelf(new Vector3(Math.cos(Math.toRadians(p.transform.rotation.y)) * -p.getWidth(), 0.0, Math.sin(Math.toRadians(p.transform.rotation.y)) * -p.getWidth()));
+			rightPoint.addSelf(new Vector3(Math.cos(Math.toRadians(p.transform.rotation.y)) * p.getWidth(), 0.0, Math.sin(Math.toRadians(p.transform.rotation.y)) * p.getWidth()));
+
+			Vector3 portalDirection = rightPoint.subtract(leftPoint);
+			portalDirection.divideSelf(portalDirection.x);
+
+			// If they're parallel, it won't reach.
+			if (portalDirection.z == vectorDifference.z || portalDirection.z == -vectorDifference.z) {
+				continue;
+			}
+
+			// This line was done through expanded calculation.
+			double playerGradient = ((futurePosition.z - previousPosition.z) / (futurePosition.x - previousPosition.x));
+			double portalGradient = ((rightPoint.z - leftPoint.z) / (rightPoint.x - leftPoint.x));
+			if (Double.isNaN(playerGradient)) {
+				playerGradient = 100000.0;
+			}
+			if (Double.isNaN(portalGradient)) {
+				portalGradient = 1000000.0;
+			}
+
+			Vector3 intersection = new Vector3(((leftPoint.z - portalGradient * leftPoint.x - previousPosition.z + playerGradient * previousPosition.x) / (playerGradient - portalGradient)), 0.0, ((rightPoint.z - leftPoint.z) / (rightPoint.x - leftPoint.x)) * ((leftPoint.z - portalGradient * leftPoint.x - previousPosition.z + playerGradient * previousPosition.x) / (playerGradient - portalGradient)) + leftPoint.z - portalGradient * leftPoint.x);
+
+			// Skip if the intersection is outside the specified regions.
+			if (leftPoint.x <= rightPoint.x && (leftPoint.x > intersection.x || intersection.x > rightPoint.x)) {
+				continue;
+			} else if (rightPoint.x > intersection.x || intersection.x > leftPoint.x) {
+				continue;
+			} else if (leftPoint.z <= rightPoint.z && (leftPoint.z > intersection.z || intersection.z > rightPoint.z)) {
+				continue;
+			} else if (rightPoint.z > intersection.z || intersection.z > leftPoint.z) {
+				continue;
+			} else if (previousPosition.x <= futurePosition.x && (previousPosition.x > intersection.x || intersection.x > futurePosition.x)) {
+				continue;
+			} else if (futurePosition.x > intersection.x || intersection.x > previousPosition.x) {
+				continue;
+			} else if (previousPosition.z <= futurePosition.z && (previousPosition.z > intersection.z || intersection.z > futurePosition.z)) {
+				continue;
+			} else if (futurePosition.z > intersection.z || intersection.z > previousPosition.z) {
+				continue;
+			}
+
+			Vector3 remainingVector = futurePosition.subtract(intersection);
+
+			Vector3 intersectionToPortalCentre = p.transform.position.subtract(intersection);
+			Vector3 portalDifference = p.getConnection().transform.position.subtract(p.transform.position);
+			double portalRotationDifference = p.getConnection().transform.rotation.y - p.transform.rotation.y;
+			Vector3 rotatedIntersectionToPortalCentre = intersection.add(portalDifference).add(new Vector3(intersectionToPortalCentre.x * Math.cos(Math.toRadians(portalRotationDifference)) - intersectionToPortalCentre.z * Math.sin(Math.toRadians(portalRotationDifference)), 0.0, intersectionToPortalCentre.x * Math.sin(Math.toRadians(portalRotationDifference)) + intersectionToPortalCentre.z * Math.sin(Math.toRadians(portalRotationDifference))));
+
+			Vector3 rotatedRemainingVector = new Vector3(remainingVector.x * Math.cos(Math.toRadians(portalRotationDifference)) - remainingVector.z * Math.sin(Math.toRadians(portalRotationDifference)), 0.0, remainingVector.x * Math.sin(Math.toRadians(portalRotationDifference)) + remainingVector.z * Math.cos(Math.toRadians(portalRotationDifference)));
+
+			object.transform.position = p.getConnection().transform.position.add(rotatedIntersectionToPortalCentre).add(rotatedRemainingVector);
+			object.transform.rotation.y += portalRotationDifference;
+
+			rotatedRemainingVector.multiplySelf(0.001);
+
+			moveObjectThroughPortal(object, p.getConnection().transform.position.add(rotatedIntersectionToPortalCentre.add(rotatedRemainingVector)));
+
+			break;
+
+		}
+	}
+
 
 	@Override
 	public void draw(GL2 gl) {

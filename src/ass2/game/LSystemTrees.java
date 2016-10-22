@@ -101,7 +101,7 @@ public class LSystemTrees extends GameObject implements Drawable {
 		double angle = 15;
 		//what am I doing
 		
-        gl.glMatrixMode(GL2.GL_MODELVIEW); // is this all I need to do?
+        //gl.glMatrixMode(GL2.GL_MODELVIEW); // is this all I need to do?
         //gl.glPushMatrix();
         //gl.glLoadIdentity();
 
