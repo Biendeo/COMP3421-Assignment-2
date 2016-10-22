@@ -79,7 +79,11 @@ public class Portal extends GameObject implements Drawable {
 			gl.glEnable(GL2.GL_STENCIL_TEST);
 
 			// This draws the portal to the stencil buffer.
-			gl.glColor4d(1.0, 1.0, 1.0, 0.3);
+			gl.glColor4d(0.5, 0.8, 1.0, 0.5);
+			gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT, new float[]{1.0f, 1.0f, 1.0f}, 0);
+			gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, new float[]{1.0f, 1.0f, 1.0f}, 0);
+			gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, new float[]{1.0f, 1.0f, 1.0f}, 0);
+			gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SHININESS, new float[]{1.0f, 1.0f, 1.0f}, 0);
 			gl.glStencilMask(0xFF);
 			gl.glStencilFunc(GL2.GL_NEVER, 0, 0xFF);
 			gl.glStencilOp(GL2.GL_INCR, GL2.GL_KEEP, GL2.GL_KEEP);

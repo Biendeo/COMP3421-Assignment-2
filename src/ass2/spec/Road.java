@@ -114,7 +114,7 @@ public class Road extends GameObject implements Drawable {
 			}
 		}
 	}
-	
+
 	private double[][] calculateCorners(double[] pOne, double[] pTwo) {
 		
 		//getting vector between points
@@ -332,12 +332,12 @@ public class Road extends GameObject implements Drawable {
     		}
 			
 			gl.glTexCoord2d(0.0, spineDist * textureScale);
+			gl.glNormal3d(0.0, 1.0, 0.0);
     		gl.glVertex3d(this.vertexMesh.get(i)[0], this.vertexMesh.get(i)[1], this.vertexMesh.get(i)[2]);
     		
 			gl.glTexCoord2d(1.0, spineDist * textureScale);
-    		gl.glVertex3d(this.vertexMesh.get(i+1)[0], this.vertexMesh.get(i+1)[1], this.vertexMesh.get(i+1)[2]);
-
-			System.out.println(spineDist);
+			gl.glNormal3d(0.0, 1.0, 0.0);
+			gl.glVertex3d(this.vertexMesh.get(i+1)[0], this.vertexMesh.get(i+1)[1], this.vertexMesh.get(i+1)[2]);
 
     		bezierCount++;
 		}
