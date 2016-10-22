@@ -18,4 +18,12 @@ public class Transform {
 		rotation = new Vector3(0.0, 0.0, 0.0);
 		scale = new Vector3(1.0, 1.0, 1.0);
 	}
+
+	public Transform clone() {
+		Transform r = new Transform();
+		r.position = position.clone();
+		r.rotation = rotation.clone();
+		r.scale = scale.clone();
+		return r;
+	}
 }
