@@ -315,27 +315,30 @@ public class Road extends GameObject implements Drawable {
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SHININESS, new float[]{material.phong.x, material.phong.y, material.phong.z}, 0);
 		
 		gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2.GL_FILL);
-		gl.glColor3f(0, 0, 0);
+
+		gl.glBindTexture(GL2.GL_TEXTURE_2D, roadTexture.getTextureId());
 		gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
 		
-		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
-		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE);
-		
-		gl.glBindTexture(GL2.GL_TEXTURE_2D, roadTexture.getTextureId());
+		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
+		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
+
 		gl.glBegin(GL2.GL_TRIANGLE_STRIP);
+		final double textureScale = 0.25;
 		double spineDist=0;
 		int bezierCount=0;
-		for (int i=0;i+1<this.vertexMesh.size();i+=2){
+		for (int i = this.vertexMesh.size() - 2; i >= 0; i -= 2){
     		if(bezierCount+1<this.bezierPoints.size()){
     			spineDist+= distanceBetweenPoints(this.bezierPoints.get(bezierCount), this.bezierPoints.get(bezierCount+1));
     		}
 			
-			gl.glTexCoord2d(0.0, spineDist); 
+			gl.glTexCoord2d(0.0, spineDist * textureScale);
     		gl.glVertex3d(this.vertexMesh.get(i)[0], this.vertexMesh.get(i)[1], this.vertexMesh.get(i)[2]);
     		
-			gl.glTexCoord2d(1.0, spineDist); 
+			gl.glTexCoord2d(1.0, spineDist * textureScale);
     		gl.glVertex3d(this.vertexMesh.get(i+1)[0], this.vertexMesh.get(i+1)[1], this.vertexMesh.get(i+1)[2]);
- 
+
+			System.out.println(spineDist);
+
     		bezierCount++;
 		}
 		gl.glEnd();
