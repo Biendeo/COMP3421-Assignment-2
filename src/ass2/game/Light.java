@@ -88,6 +88,10 @@ public class Light extends GameObject implements Updatable, Drawable {
 			}
 		}
 
+		if (Input.getKeyDown(KeyEvent.VK_SEMICOLON)) {
+			visibleModel = !visibleModel;
+		}
+
 		if (type == LightType.POINT) {
 			if (Input.getKey(KeyEvent.VK_I)) {
 				transform.position.addSelf(new Vector3(0.0, 0.0, -1.0).multiplySelf(dt * movementSpeed));

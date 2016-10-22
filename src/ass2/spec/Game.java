@@ -120,6 +120,10 @@ public class Game extends JFrame implements GLEventListener {
 		GameObject.ROOT.tryUpdate(dt);
 	}
 
+	/**
+	 * Sets up all the objects that have currently not yet been initialized.
+	 * @param gl
+	 */
 	public void initializeObjects(GL2 gl) {
 		ArrayList<Drawable> uninitializedObjects = new ArrayList<Drawable>(GameObject.UNINITIALIZED_OBJECTS);
 
@@ -129,6 +133,10 @@ public class Game extends JFrame implements GLEventListener {
 		}
 	}
 
+	/**
+	 * Destroys all resources that need to be disposed.
+	 * @param gl
+	 */
 	public void disposeObjects(GL2 gl) {
 		ArrayList<Drawable> undisposedObjects = new ArrayList<Drawable>(GameObject.UNDISPOSED_OBJECTS);
 

@@ -42,6 +42,10 @@ public class PlayerController extends GameObject implements Updatable, Drawable 
 		camera = null;
 	}
 
+	/**
+	 * Sets the player's camera.
+	 * @param camera
+	 */
 	public void setCamera(Camera camera) {
 		this.camera = camera;
 	}
@@ -203,6 +207,9 @@ public class PlayerController extends GameObject implements Updatable, Drawable 
 		}
 	}
 
+	/**
+	 * Moves the camera to the right angle depending on the player's rotation and pitch.
+	 */
 	private void positionThirdPersonCamera() {
 		double angleRads = Math.toRadians(camera.transform.rotation.x);
 

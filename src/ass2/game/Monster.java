@@ -63,6 +63,11 @@ public class Monster extends GameObject implements Drawable, Updatable {
 		currentIndex = this.path.size() - 1;
 	}
 
+	/**
+	 * Returns the next index that the monster must go to.
+	 * @param currentIndex The current index.
+	 * @return
+	 */
 	private int nextIndex(int currentIndex) {
 		int nextIndex = currentIndex + 1;
 		if (nextIndex == path.size()) {
@@ -71,6 +76,10 @@ public class Monster extends GameObject implements Drawable, Updatable {
 		return nextIndex;
 	}
 
+	/**
+	 * Calculates the total path length designated, and stores it in the monster's field.
+	 * @return The length.
+	 */
 	private double calculatePathLength() {
 		pathLength = 0.0;
 		for (int i = 0; i < path.size(); ++i) {
@@ -100,6 +109,9 @@ public class Monster extends GameObject implements Drawable, Updatable {
 		return nextPoint.subtract(currentPosition);
 	}
 
+	/**
+	 * Rotates the monster toward the next point.
+	 */
 	private void rotateToNextPoint() {
 		Vector3 movementVector = vectorToNextPoint();
 
@@ -115,6 +127,11 @@ public class Monster extends GameObject implements Drawable, Updatable {
 		}
 	}
 
+	/**
+	 * Moves the monster toward the next point. This will call recursively if the monster reaches
+	 * its next point.
+	 * @param amount
+	 */
 	private void moveTowardsNextPoint(double amount) {
 		// This gets rid of stack overflows with large amounts.
 		while (amount >= pathLength) {

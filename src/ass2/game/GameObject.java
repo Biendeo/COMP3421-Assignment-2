@@ -54,14 +54,25 @@ public class GameObject {
 		this.enabled = true;
 	}
 
+	/**
+	 * Returns whether the object is enabled.
+	 * @return
+	 */
 	public boolean isEnabled() {
 		return enabled;
 	}
 
+	/**
+	 * Switches between enabling and disabling the object.
+	 */
 	public void toggleEnabled() {
 		enabled = !enabled;
 	}
 
+	/**
+	 * Sets the enabled state of the object.
+	 * @param enabled
+	 */
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}

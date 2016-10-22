@@ -19,6 +19,13 @@ public class Portal extends GameObject implements Drawable {
 	private static int currentPortalViewDepth = 0;
 	public static int portalViewDepth = 1;
 
+	/**
+	 * Constructs a new Portal object. It needs to be connected to another portal before drawn.
+	 * @param parent The parent GameObject.
+	 * @param terrain The terrain object.
+	 * @param width The width of the portal.
+	 * @param height The height of the portal.
+	 */
 	public Portal(GameObject parent, Terrain terrain, double width, double height) {
 		super(parent);
 
@@ -28,10 +35,19 @@ public class Portal extends GameObject implements Drawable {
 		activeCamera = null;
 	}
 
+	/**
+	 * Returns the connected portal.
+	 * @return
+	 */
 	public Portal getConnection() {
 		return connection;
 	}
 
+	/**
+	 * Connects two portals.
+	 * @param portal1
+	 * @param portal2
+	 */
 	public static void connectPortals(Portal portal1, Portal portal2) {
 		portal1.connection = portal2;
 		portal2.connection = portal1;
@@ -133,6 +149,7 @@ public class Portal extends GameObject implements Drawable {
 			gl.glDisable(GL2.GL_STENCIL_TEST);
 
 
+			// This was a different attempt at getting the portal to work.
 
 			/*
 			gl.glColorMask(false, false, false, false);
@@ -184,6 +201,10 @@ public class Portal extends GameObject implements Drawable {
 		}
 	}
 
+	/**
+	 * An attempt at drawing through a portal and rendering the scene again.
+	 * @param gl
+	 */
 	private void drawRecursivePortal(GL2 gl) {
 		gl.glColorMask(false, false, false, false);
 		gl.glDepthMask(false);

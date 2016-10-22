@@ -123,30 +123,60 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener {
 		}
 	}
 
+	/**
+	 * Gets the current mouse x position.
+	 * @return
+	 */
 	public static int getMouseX() {
 		return currentMouseX;
 	}
 
+	/**
+	 * Gets the current mouse y position.
+	 * @return
+	 */
 	public static int getMouseY() {
 		return currentMouseY;
 	}
 
+	/**
+	 * Gets the current mouse delta x.
+	 * @return
+	 */
 	public static int getMouseDeltaX() {
 		return currentMouseX - previousMouseX;
 	}
 
+	/**
+	 * Gets the current mouse delta y.
+	 * @return
+	 */
 	public static int getMouseDeltaY() {
 		return currentMouseY - previousMouseY;
 	}
 
+	/**
+	 * Gets the current mouse lock state.
+	 * @return
+	 */
 	public static boolean getMouseLock() {
 		return mouseLock;
 	}
 
+	/**
+	 * Toggles the current mouse lock.
+	 */
 	public static void toggleMouseLock() {
 		mouseLock = !mouseLock;
 	}
 
+	/**
+	 * Centres the mouse given parameters.
+	 * @param windowX The x position of the window on the monitor.
+	 * @param windowY The y position of the window on the monitor.
+	 * @param windowWidth The width of the window.
+	 * @param windowHeight The height of the window.
+	 */
 	public static void recenterMouse(int windowX, int windowY, int windowWidth, int windowHeight) {
 		Robot robot;
 		try {
