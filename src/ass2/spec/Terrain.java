@@ -185,9 +185,11 @@ public class Terrain extends GameObject implements Drawable {
 		// This determines whether the top-right triangle is used.
 		// TODO: Double check that this works, I'm noticing some jumpy motion sometimes.
 		boolean alternateTriangle = false;
-		if (x + z > 1.0) {
+		if ((x - floorX + z - floorZ) > 1.0) {
 			alternateTriangle = true;
 		}
+
+		System.out.println(alternateTriangle);
 
 		// This method is called barycentric coordinates.
 		// Source: http://www.alecjacobson.com/weblog/?p=1596
@@ -296,8 +298,13 @@ public class Terrain extends GameObject implements Drawable {
 
 			Vector3 intersection = new Vector3(((leftPoint.z - portalGradient * leftPoint.x - previousPosition.z + playerGradient * previousPosition.x) / (playerGradient - portalGradient)), 0.0, ((rightPoint.z - leftPoint.z) / (rightPoint.x - leftPoint.x)) * ((leftPoint.z - portalGradient * leftPoint.x - previousPosition.z + playerGradient * previousPosition.x) / (playerGradient - portalGradient)) + leftPoint.z - portalGradient * leftPoint.x);
 
+			//System.out.println(Double.toString(intersection.x) + ", " + Double.toString(intersection.y) + ", " + Double.toString(intersection.z));
+
 			// Skip if the intersection is outside the specified regions.
-			if (leftPoint.x <= rightPoint.x && (leftPoint.x > intersection.x || intersection.x > rightPoint.x)) {
+
+			if (Double.isNaN(intersection.x) || Double.isNaN(intersection.z)) {
+				continue;
+			} else if (leftPoint.x <= rightPoint.x && (leftPoint.x > intersection.x || intersection.x > rightPoint.x)) {
 				continue;
 			} else if (rightPoint.x > intersection.x || intersection.x > leftPoint.x) {
 				continue;
