@@ -290,7 +290,7 @@ public class Road extends GameObject implements Drawable {
 
 	@Override
 	public void initialize(GL2 gl) {
-		roadTexture = new Texture(gl, "src/ass2/textures/roadTexture2.bmp", true);
+		roadTexture = new Texture(gl, getClass().getResourceAsStream("/textures/roadTexture2.jpg"), true);
 		gl.glEnable(GL2.GL_TEXTURE_2D);
 		material = new Material();
 		material.diffuse = new Vector4f(0.5f, 0.5f, 0.5f, 1.0f);

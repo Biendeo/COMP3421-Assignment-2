@@ -1,6 +1,5 @@
 package ass2.game;
 
-import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.glu.GLUquadric;
@@ -30,7 +29,7 @@ public class LSystemTrees extends GameObject implements Drawable {
 		
 		this.transform.position = new Vector3(x, y, z);
 		material = new Material();
-		material.diffuse = new Vector4f(.5f, 0.35f, 0.05f, 0.0f);
+		material.diffuse = new Vector4f(0.5f, 0.35f, 0.05f, 0.0f);
 	}
 	
 	private String generateString(){
@@ -60,7 +59,6 @@ public class LSystemTrees extends GameObject implements Drawable {
 		double branchLength = 0.2;
 		double currentBranchRadius = initialBranchRadius - branchRadiusReduction*branchDepth;
 		
-		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		//gl.glEnable(GL2.GL_TEXTURE_2D);
 		gl.glPushMatrix();
 		gl.glRotated(-90, 1, 0, 0);
@@ -93,7 +91,7 @@ public class LSystemTrees extends GameObject implements Drawable {
 	@Override
 	public void initialize(GL2 gl) {
 		// TODO Auto-generated method stub
-		this.treeTexture = new Texture(gl, "src/ass2/textures/treeTexture.bmp", true);
+		this.treeTexture = new Texture(gl, getClass().getResourceAsStream("/textures/treeTexture.jpg"), true);
 		
 	}
 
@@ -110,7 +108,7 @@ public class LSystemTrees extends GameObject implements Drawable {
 		double angle = 15;
 		//what am I doing
 		
-        gl.glMatrixMode(GL2.GL_MODELVIEW); // is this all I need to do?
+        //gl.glMatrixMode(GL2.GL_MODELVIEW); // is this all I need to do?
         //gl.glPushMatrix();
         //gl.glLoadIdentity();
 

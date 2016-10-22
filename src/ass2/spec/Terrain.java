@@ -28,6 +28,7 @@ public class Terrain extends GameObject implements Drawable {
 	private int numTreeGens;
 	private List<Road> myRoads;
 	private List<Portal> myPortals;
+	private List<Monster> myMonsters;
 	private Vector3f mySunlight;
 	private Material material;
 	private Texture texture;
@@ -49,6 +50,7 @@ public class Terrain extends GameObject implements Drawable {
 		numTreeGens = 4;
 		myRoads = new ArrayList<Road>();
 		myPortals = new ArrayList<Portal>();
+		myMonsters = new ArrayList<Monster>();
 		mySunlight = new Vector3f();
 
 		material = new Material();
@@ -79,6 +81,10 @@ public class Terrain extends GameObject implements Drawable {
 
 	public List<Portal> portals() {
 		return myPortals;
+	}
+
+	public List<Monster> monsters() {
+		return myMonsters;
 	}
 
 	public Vector3f getSunlight() {
@@ -179,7 +185,7 @@ public class Terrain extends GameObject implements Drawable {
 		// This determines whether the top-right triangle is used.
 		// TODO: Double check that this works, I'm noticing some jumpy motion sometimes.
 		boolean alternateTriangle = false;
-		if (x + z > 1.0) {
+		if ((x - floorX + z - floorZ) > 1.0) {
 			alternateTriangle = true;
 		}
 
@@ -233,10 +239,10 @@ public class Terrain extends GameObject implements Drawable {
 	}
 
 	public void addPortalPair(double portal1X, double portal1Z, double portal1Angle, double portal2X, double portal2Z, double portal2Angle, double width, double height) {
-		Portal portal1 = new Portal(this, width, height);
+		Portal portal1 = new Portal(this, this, width, height);
 		portal1.transform.position = new Vector3(portal1X, altitude(portal1X, portal1Z) + height / 2, portal1Z);
 		portal1.transform.rotation = new Vector3(0.0, portal1Angle, 0.0);
-		Portal portal2 = new Portal(this, width, height);
+		Portal portal2 = new Portal(this, this, width, height);
 		portal2.transform.position = new Vector3(portal2X, altitude(portal2X, portal2Z) + height / 2, portal2Z);
 		portal2.transform.rotation = new Vector3(0.0, portal2Angle, 0.0);
 		Portal.connectPortals(portal1, portal2);
@@ -244,6 +250,108 @@ public class Terrain extends GameObject implements Drawable {
 		myPortals.add(portal2);
 	}
 
+	public void addMonster(List<Vector3> path, double speed) {
+		Monster monster = new Monster(this, this, path, speed);
+		myMonsters.add(monster);
+	}
+
+	public void setPortalCamera(Camera camera) {
+		for (Portal portal : myPortals) {
+			portal.setActiveCamera(camera);
+		}
+	}
+
+	/**
+	 * Determines whether an object should be moved through a portal, and does it.
+	 * @param object The object in question.
+	 * @param previousPosition The global position of the object before.
+	 */
+	public void moveObjectThroughPortal(GameObject object, Vector3 previousPosition) {
+		Vector3 futurePosition = object.getGlobalPositionVector();
+
+		for (Portal p : myPortals) {
+			Vector3 leftPoint = p.transform.position.clone();
+			Vector3 rightPoint = p.transform.position.clone();
+			leftPoint.addSelf(new Vector3(Math.cos(Math.toRadians(p.transform.rotation.y)) * -p.getWidth(), 0.0, Math.sin(Math.toRadians(p.transform.rotation.y)) * -p.getWidth()));
+			rightPoint.addSelf(new Vector3(Math.cos(Math.toRadians(p.transform.rotation.y)) * p.getWidth(), 0.0, Math.sin(Math.toRadians(p.transform.rotation.y)) * p.getWidth()));
+
+			// This line was done through expanded calculation.
+			Vector3 p1 = previousPosition;
+			Vector3 p2 = futurePosition;
+			Vector3 p3 = leftPoint;
+			Vector3 p4 = rightPoint;
+
+			Vector3 intersection = new Vector3((((p1.x * p2.z - p1.z * p2.x) * (p3.x - p4.x) - (p1.x - p2.x) * (p3.x * p4.z - p3.z * p4.x)) / ((p1.x - p2.x) * (p3.z - p4.z) - (p1.z - p2.z) * (p3.x - p4.x))), 0.0, (((p1.x * p2.z - p1.z * p2.x) * (p3.z - p4.z) - (p1.y - p2.y) * (p3.x * p4.z - p3.z * p4.x)) / ((p1.x - p2.x) * (p3.z - p4.z) - (p1.z - p2.z) * (p3.x - p4.x))));
+
+/*
+			System.out.println("---");
+			System.out.println(Double.toString(intersection.x) + ", " + Double.toString(intersection.y) + ", " + Double.toString(intersection.z));
+			System.out.println(Double.toString(p1.x) + ", " + Double.toString(p1.y) + ", " + Double.toString(p1.z));
+			System.out.println(Double.toString(p2.x) + ", " + Double.toString(p2.y) + ", " + Double.toString(p2.z));
+			System.out.println(Double.toString(p3.x) + ", " + Double.toString(p3.y) + ", " + Double.toString(p3.z));
+			System.out.println(Double.toString(p4.x) + ", " + Double.toString(p4.y) + ", " + Double.toString(p4.z));
+*/
+			// Skip if the intersection is outside the specified regions.
+
+			if (Double.isNaN(intersection.x) || Double.isNaN(intersection.z)) {
+				continue;
+			} else if (Math.abs(p4.x - p3.x) < Math.abs(intersection.x - p3.x) || Math.abs(p4.x - p3.x) < Math.abs(intersection.x - p4.x)) {
+				continue;
+			} else if (Math.abs(p4.z - p3.z) < Math.abs(intersection.z - p3.z) || Math.abs(p4.z - p3.z) < Math.abs(intersection.z - p4.z)) {
+				continue;
+			} else if (Math.abs(p2.x - p1.x) < Math.abs(intersection.x - p1.x) || Math.abs(p2.x - p1.x) < Math.abs(intersection.x - p2.x)) {
+				continue;
+			} else if (Math.abs(p2.z - p1.z) < Math.abs(intersection.z - p1.z) || Math.abs(p2.z - p1.z) < Math.abs(intersection.z - p2.z)) {
+				continue;
+			}
+			/*
+			else if (leftPoint.x <= rightPoint.x && (leftPoint.x > intersection.x || intersection.x > rightPoint.x)) {
+				System.out.println("2");
+				continue;
+			} else if (rightPoint.x > intersection.x || intersection.x > leftPoint.x) {
+				System.out.println("3");
+				continue;
+			} else if (leftPoint.z <= rightPoint.z && (leftPoint.z > intersection.z || intersection.z > rightPoint.z)) {
+				System.out.println("4");
+				continue;
+			} else if (rightPoint.z > intersection.z || intersection.z > leftPoint.z) {
+				System.out.println("5");
+				continue;
+			} else if (previousPosition.x <= futurePosition.x && (previousPosition.x > intersection.x || intersection.x > futurePosition.x)) {
+				System.out.println("6");
+				continue;
+			} else if (futurePosition.x > intersection.x || intersection.x > previousPosition.x) {
+				System.out.println("7");
+				continue;
+			} else if (previousPosition.z <= futurePosition.z && (previousPosition.z > intersection.z || intersection.z > futurePosition.z)) {
+				System.out.println("8");
+				continue;
+			} else if (futurePosition.z > intersection.z || intersection.z > previousPosition.z) {
+				System.out.println("9");
+				continue;
+			}
+			*/
+
+			Vector3 remainingVector = futurePosition.subtract(intersection);
+
+			Vector3 intersectionToPortalCentre = p.transform.position.subtract(intersection);
+			Vector3 portalDifference = p.getConnection().transform.position.subtract(p.transform.position);
+			double portalRotationDifference = p.getConnection().transform.rotation.y - p.transform.rotation.y;
+			Vector3 rotatedIntersectionToPortalCentre = intersection.add(portalDifference).add(new Vector3(intersectionToPortalCentre.x * Math.cos(Math.toRadians(portalRotationDifference)) - intersectionToPortalCentre.z * Math.sin(Math.toRadians(portalRotationDifference)), 0.0, intersectionToPortalCentre.x * Math.sin(Math.toRadians(portalRotationDifference)) + intersectionToPortalCentre.z * Math.sin(Math.toRadians(portalRotationDifference))));
+
+			Vector3 rotatedRemainingVector = new Vector3(remainingVector.x * Math.cos(Math.toRadians(portalRotationDifference)) - remainingVector.z * Math.sin(Math.toRadians(portalRotationDifference)), 0.0, remainingVector.x * Math.sin(Math.toRadians(portalRotationDifference)) + remainingVector.z * Math.cos(Math.toRadians(portalRotationDifference)));
+
+			object.transform.position = p.getConnection().transform.position.add(rotatedIntersectionToPortalCentre).add(rotatedRemainingVector);
+			object.transform.rotation.y += portalRotationDifference;
+
+			rotatedRemainingVector.multiplySelf(0.001);
+
+			moveObjectThroughPortal(object, p.getConnection().transform.position.add(rotatedIntersectionToPortalCentre.add(rotatedRemainingVector)));
+
+			break;
+
+		}
+	}
 
 	@Override
 	public void draw(GL2 gl) {
@@ -331,13 +439,13 @@ public class Terrain extends GameObject implements Drawable {
 				vertices[((x * mySize.height) + z) * 18 + 7] = (float)bottomRight.y;
 				vertices[((x * mySize.height) + z) * 18 + 8] = (float)bottomRight.z;
 
-				vertices[((x * mySize.height) + z) * 18 + 9] = (float)topRight.x;
-				vertices[((x * mySize.height) + z) * 18 + 10] = (float)topRight.y;
-				vertices[((x * mySize.height) + z) * 18 + 11] = (float)topRight.z;
+				vertices[((x * mySize.height) + z) * 18 + 9] = (float)topLeft.x;
+				vertices[((x * mySize.height) + z) * 18 + 10] = (float)topLeft.y;
+				vertices[((x * mySize.height) + z) * 18 + 11] = (float)topLeft.z;
 
-				vertices[((x * mySize.height) + z) * 18 + 12] = (float)topLeft.x;
-				vertices[((x * mySize.height) + z) * 18 + 13] = (float)topLeft.y;
-				vertices[((x * mySize.height) + z) * 18 + 14] = (float)topLeft.z;
+				vertices[((x * mySize.height) + z) * 18 + 12] = (float)topRight.x;
+				vertices[((x * mySize.height) + z) * 18 + 13] = (float)topRight.y;
+				vertices[((x * mySize.height) + z) * 18 + 14] = (float)topRight.z;
 
 				vertices[((x * mySize.height) + z) * 18 + 15] = (float)bottomRight.x;
 				vertices[((x * mySize.height) + z) * 18 + 16] = (float)bottomRight.y;
@@ -370,9 +478,9 @@ public class Terrain extends GameObject implements Drawable {
 				texturePositions[((x * mySize.height) + z) * 12 + 4] = 1.0f;
 				texturePositions[((x * mySize.height) + z) * 12 + 5] = 0.0f;
 
-				texturePositions[((x * mySize.height) + z) * 12 + 6] = 1.0f;
+				texturePositions[((x * mySize.height) + z) * 12 + 6] = 0.0f;
 				texturePositions[((x * mySize.height) + z) * 12 + 7] = 1.0f;
-				texturePositions[((x * mySize.height) + z) * 12 + 8] = 0.0f;
+				texturePositions[((x * mySize.height) + z) * 12 + 8] = 1.0f;
 				texturePositions[((x * mySize.height) + z) * 12 + 9] = 1.0f;
 				texturePositions[((x * mySize.height) + z) * 12 + 10] = 1.0f;
 				texturePositions[((x * mySize.height) + z) * 12 + 11] = 0.0f;

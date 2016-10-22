@@ -48,6 +48,8 @@ public class PlayerController extends GameObject implements Updatable, Drawable 
 
 	@Override
 	public void update(double dt) {
+		Vector3 originalPosition = getGlobalPositionVector();
+
 		if (mouseLook) {
 			turnRight(mouseSensitivityX * Input.getMouseDeltaX() / 100.0);
 			lookDown(mouseSensitivityY * Input.getMouseDeltaY() / 100.0);
@@ -120,6 +122,7 @@ public class PlayerController extends GameObject implements Updatable, Drawable 
 		}
 
 		if (!noClip) {
+			terrain.moveObjectThroughPortal(this, originalPosition);
 			transform.position.y = terrain.altitude(transform.position.x, transform.position.z) + height;
 		}
 	}

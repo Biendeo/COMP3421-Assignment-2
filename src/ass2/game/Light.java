@@ -30,7 +30,7 @@ public class Light extends GameObject implements Updatable, Drawable {
 		material = new Material();
 		this.lightNumber = lightNumber;
 		this.type = type;
-		this.visibleModel = true;
+		this.visibleModel = false;
 	}
 
 	/**
