@@ -189,8 +189,6 @@ public class Terrain extends GameObject implements Drawable {
 			alternateTriangle = true;
 		}
 
-		System.out.println(alternateTriangle);
-
 		// This method is called barycentric coordinates.
 		// Source: http://www.alecjacobson.com/weblog/?p=1596
 
@@ -269,8 +267,6 @@ public class Terrain extends GameObject implements Drawable {
 	 */
 	public void moveObjectThroughPortal(GameObject object, Vector3 previousPosition) {
 		Vector3 futurePosition = object.getGlobalPositionVector();
-		Vector3 vectorDifference = futurePosition.subtract(previousPosition);
-		vectorDifference.divideSelf(vectorDifference.x);
 
 		for (Portal p : myPortals) {
 			Vector3 leftPoint = p.transform.position.clone();
@@ -278,49 +274,62 @@ public class Terrain extends GameObject implements Drawable {
 			leftPoint.addSelf(new Vector3(Math.cos(Math.toRadians(p.transform.rotation.y)) * -p.getWidth(), 0.0, Math.sin(Math.toRadians(p.transform.rotation.y)) * -p.getWidth()));
 			rightPoint.addSelf(new Vector3(Math.cos(Math.toRadians(p.transform.rotation.y)) * p.getWidth(), 0.0, Math.sin(Math.toRadians(p.transform.rotation.y)) * p.getWidth()));
 
-			Vector3 portalDirection = rightPoint.subtract(leftPoint);
-			portalDirection.divideSelf(portalDirection.x);
-
-			// If they're parallel, it won't reach.
-			if (portalDirection.z == vectorDifference.z || portalDirection.z == -vectorDifference.z) {
-				continue;
-			}
-
 			// This line was done through expanded calculation.
-			double playerGradient = ((futurePosition.z - previousPosition.z) / (futurePosition.x - previousPosition.x));
-			double portalGradient = ((rightPoint.z - leftPoint.z) / (rightPoint.x - leftPoint.x));
-			if (Double.isNaN(playerGradient)) {
-				playerGradient = 100000.0;
-			}
-			if (Double.isNaN(portalGradient)) {
-				portalGradient = 1000000.0;
-			}
+			Vector3 p1 = previousPosition;
+			Vector3 p2 = futurePosition;
+			Vector3 p3 = leftPoint;
+			Vector3 p4 = rightPoint;
 
-			Vector3 intersection = new Vector3(((leftPoint.z - portalGradient * leftPoint.x - previousPosition.z + playerGradient * previousPosition.x) / (playerGradient - portalGradient)), 0.0, ((rightPoint.z - leftPoint.z) / (rightPoint.x - leftPoint.x)) * ((leftPoint.z - portalGradient * leftPoint.x - previousPosition.z + playerGradient * previousPosition.x) / (playerGradient - portalGradient)) + leftPoint.z - portalGradient * leftPoint.x);
+			Vector3 intersection = new Vector3((((p1.x * p2.z - p1.z * p2.x) * (p3.x - p4.x) - (p1.x - p2.x) * (p3.x * p4.z - p3.z * p4.x)) / ((p1.x - p2.x) * (p3.z - p4.z) - (p1.z - p2.z) * (p3.x - p4.x))), 0.0, (((p1.x * p2.z - p1.z * p2.x) * (p3.z - p4.z) - (p1.y - p2.y) * (p3.x * p4.z - p3.z * p4.x)) / ((p1.x - p2.x) * (p3.z - p4.z) - (p1.z - p2.z) * (p3.x - p4.x))));
 
-			//System.out.println(Double.toString(intersection.x) + ", " + Double.toString(intersection.y) + ", " + Double.toString(intersection.z));
-
+/*
+			System.out.println("---");
+			System.out.println(Double.toString(intersection.x) + ", " + Double.toString(intersection.y) + ", " + Double.toString(intersection.z));
+			System.out.println(Double.toString(p1.x) + ", " + Double.toString(p1.y) + ", " + Double.toString(p1.z));
+			System.out.println(Double.toString(p2.x) + ", " + Double.toString(p2.y) + ", " + Double.toString(p2.z));
+			System.out.println(Double.toString(p3.x) + ", " + Double.toString(p3.y) + ", " + Double.toString(p3.z));
+			System.out.println(Double.toString(p4.x) + ", " + Double.toString(p4.y) + ", " + Double.toString(p4.z));
+*/
 			// Skip if the intersection is outside the specified regions.
 
 			if (Double.isNaN(intersection.x) || Double.isNaN(intersection.z)) {
 				continue;
-			} else if (leftPoint.x <= rightPoint.x && (leftPoint.x > intersection.x || intersection.x > rightPoint.x)) {
+			} else if (Math.abs(p4.x - p3.x) < Math.abs(intersection.x - p3.x) || Math.abs(p4.x - p3.x) < Math.abs(intersection.x - p4.x)) {
 				continue;
-			} else if (rightPoint.x > intersection.x || intersection.x > leftPoint.x) {
+			} else if (Math.abs(p4.z - p3.z) < Math.abs(intersection.z - p3.z) || Math.abs(p4.z - p3.z) < Math.abs(intersection.z - p4.z)) {
 				continue;
-			} else if (leftPoint.z <= rightPoint.z && (leftPoint.z > intersection.z || intersection.z > rightPoint.z)) {
+			} else if (Math.abs(p2.x - p1.x) < Math.abs(intersection.x - p1.x) || Math.abs(p2.x - p1.x) < Math.abs(intersection.x - p2.x)) {
 				continue;
-			} else if (rightPoint.z > intersection.z || intersection.z > leftPoint.z) {
-				continue;
-			} else if (previousPosition.x <= futurePosition.x && (previousPosition.x > intersection.x || intersection.x > futurePosition.x)) {
-				continue;
-			} else if (futurePosition.x > intersection.x || intersection.x > previousPosition.x) {
-				continue;
-			} else if (previousPosition.z <= futurePosition.z && (previousPosition.z > intersection.z || intersection.z > futurePosition.z)) {
-				continue;
-			} else if (futurePosition.z > intersection.z || intersection.z > previousPosition.z) {
+			} else if (Math.abs(p2.z - p1.z) < Math.abs(intersection.z - p1.z) || Math.abs(p2.z - p1.z) < Math.abs(intersection.z - p2.z)) {
 				continue;
 			}
+			/*
+			else if (leftPoint.x <= rightPoint.x && (leftPoint.x > intersection.x || intersection.x > rightPoint.x)) {
+				System.out.println("2");
+				continue;
+			} else if (rightPoint.x > intersection.x || intersection.x > leftPoint.x) {
+				System.out.println("3");
+				continue;
+			} else if (leftPoint.z <= rightPoint.z && (leftPoint.z > intersection.z || intersection.z > rightPoint.z)) {
+				System.out.println("4");
+				continue;
+			} else if (rightPoint.z > intersection.z || intersection.z > leftPoint.z) {
+				System.out.println("5");
+				continue;
+			} else if (previousPosition.x <= futurePosition.x && (previousPosition.x > intersection.x || intersection.x > futurePosition.x)) {
+				System.out.println("6");
+				continue;
+			} else if (futurePosition.x > intersection.x || intersection.x > previousPosition.x) {
+				System.out.println("7");
+				continue;
+			} else if (previousPosition.z <= futurePosition.z && (previousPosition.z > intersection.z || intersection.z > futurePosition.z)) {
+				System.out.println("8");
+				continue;
+			} else if (futurePosition.z > intersection.z || intersection.z > previousPosition.z) {
+				System.out.println("9");
+				continue;
+			}
+			*/
 
 			Vector3 remainingVector = futurePosition.subtract(intersection);
 
