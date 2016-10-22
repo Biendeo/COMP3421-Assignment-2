@@ -16,7 +16,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 /**
- * COMMENT: Comment LevelIO 
+ * COMMENT: Comment LevelIO
  *
  * @author malcolmr
  */
@@ -38,7 +38,7 @@ public class LevelIO {
 		int width = jsonTerrain.getInt("width");
 		int depth = jsonTerrain.getInt("depth");
 		Terrain terrain = new Terrain(width, depth);
-		
+
 		int LSystemTreesGenerations = jsonTerrain.optInt("LSystemTreesGenerations", 4);
 		terrain.setTreeGens(LSystemTreesGenerations);
 

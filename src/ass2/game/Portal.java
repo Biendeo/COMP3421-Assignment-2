@@ -3,7 +3,6 @@ package ass2.game;
 import ass2.math.Vector3;
 import ass2.spec.Terrain;
 import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.util.gl2.GLUT;
 
 /**
  * A portal object that sits in the world.

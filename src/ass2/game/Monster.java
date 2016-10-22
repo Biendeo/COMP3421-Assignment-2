@@ -148,6 +148,7 @@ public class Monster extends GameObject implements Drawable, Updatable {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
 		diffuseTexture = new Texture(gl, getClass().getResourceAsStream("/models/cat/cat_diff.jpg"), true);
 		normalTexture = new Texture(gl, getClass().getResourceAsStream("/models/cat/cat_norm.jpg"), true);
 		specularTexture = new Texture(gl, getClass().getResourceAsStream("/models/cat/cat_spec.jpg"), true);

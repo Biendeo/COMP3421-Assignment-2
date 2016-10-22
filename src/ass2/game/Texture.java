@@ -108,42 +108,42 @@ public class Texture {
 
 	}
 
-    private void setFilters(GL2 gl){
-    	// Build the texture from data.
-    	if (mipMapEnabled) {
-    		// Set texture parameters to enable automatic mipmap generation and bilinear/trilinear filtering
-    		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
-    		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR);
+	private void setFilters(GL2 gl){
+		// Build the texture from data.
+		if (mipMapEnabled) {
+			// Set texture parameters to enable automatic mipmap generation and bilinear/trilinear filtering
+			gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
+			gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR);
 
-    		float fLargest[] = new float[1];
-    		gl.glGetFloatv(GL.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, fLargest,0);
-    		gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAX_ANISOTROPY_EXT, fLargest[0]);
-    		gl.glGenerateMipmap(GL2.GL_TEXTURE_2D);
-    	} else {
-    		// Set texture parameters to enable bilinear filtering.
-    		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
-    		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR);
-    	}
+			float fLargest[] = new float[1];
+			gl.glGetFloatv(GL.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, fLargest,0);
+			gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAX_ANISOTROPY_EXT, fLargest[0]);
+			gl.glGenerateMipmap(GL2.GL_TEXTURE_2D);
+		} else {
+			// Set texture parameters to enable bilinear filtering.
+			gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
+			gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR);
+		}
 
-    }
+	}
 
 	public Texture(GL2 gl, ByteBuffer buffer, int size, boolean mipmaps) {
 		mipMapEnabled = mipmaps;
 		gl.glGenTextures(1, textureID, 0);
 		gl.glBindTexture(GL.GL_TEXTURE_2D, textureID[0]);
-	
+
 
 		// Specify image data for currently active texture object.
 		gl.glTexImage2D(GL2.GL_TEXTURE_2D, 0, GL2.GL_RGBA, size, size, 0, GL2.GL_RGBA, GL2.GL_UNSIGNED_BYTE,buffer);
-		
+
 		setFilters(gl);
-		
+
 	}
-	
+
 	public int getTextureId() {
 		return textureID[0];
 	}
-	
+
 	public void release(GL2 gl) {
 		if (textureID[0] > 0) {
 			gl.glDeleteTextures(1, textureID, 0);

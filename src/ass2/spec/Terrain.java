@@ -233,7 +233,8 @@ public class Terrain extends GameObject implements Drawable {
 	 * @param spine
 	 */
 	public void addRoad(double width, double[] spine) {
-		Road road = new Road(width, spine);
+		double y = altitude(spine[0], spine[1]);
+		Road road = new Road(this, width, spine, y);
 		myRoads.add(road);
 	}
 
@@ -352,7 +353,6 @@ public class Terrain extends GameObject implements Drawable {
 		}
 	}
 
-
 	@Override
 	public void draw(GL2 gl) {
 		// The texture should only be enabled by this object.
@@ -386,8 +386,7 @@ public class Terrain extends GameObject implements Drawable {
 
 	@Override
 	public void initialize(GL2 gl) {
-		//texture = new Texture(gl, "res/textures/grass01.jpg", true);
-		texture = new Texture(gl, getClass().getResourceAsStream("/textures/grass01.jpg"), true);
+		texture = new Texture(gl, "src/ass2/textures/grass01.jpg", true);
 
 		int[] vertexArray = new int[1];
 		gl.glGenVertexArrays(1, vertexArray, 0);
