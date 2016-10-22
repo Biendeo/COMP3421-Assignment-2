@@ -7,7 +7,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
 
 import ass2.game.LSystemTrees;
 import ass2.math.Vector3;
@@ -102,23 +101,6 @@ public class LevelIO {
 				double portalHeight = jsonPortalPair.getDouble("height");
 
 				terrain.addPortalPair(portal1X, portal1Z, portal1Angle, portal2X, portal2Z, portal2Angle, portalWidth, portalHeight);
-			}
-		}
-
-		if (jsonTerrain.has("monsters")) {
-			JSONArray jsonMonsters = jsonTerrain.getJSONArray("monsters");
-			for (int i = 0; i < jsonMonsters.length(); i++) {
-				JSONObject jsonMonster = jsonMonsters.getJSONObject(i);
-
-				double speed = jsonMonster.getDouble("speed");
-				JSONArray jsonMonsterPath = jsonMonster.getJSONArray("path");
-				ArrayList<Vector3> path = new ArrayList<>();
-
-				for (int j = 0; j < jsonMonsterPath.length(); j += 2) {
-					path.add(new Vector3(jsonMonsterPath.getDouble(j), 0.0, jsonMonsterPath.getDouble(j + 1)));
-				}
-
-				terrain.addMonster(path, speed);
 			}
 		}
 		return terrain;

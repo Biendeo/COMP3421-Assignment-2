@@ -148,9 +148,9 @@ public class Monster extends GameObject implements Drawable, Updatable {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		diffuseTexture = new Texture(gl, getClass().getResourceAsStream("/models/cat/cat_diff.jpg"), true);
-		normalTexture = new Texture(gl, getClass().getResourceAsStream("/models/cat/cat_norm.jpg"), true);
-		specularTexture = new Texture(gl, getClass().getResourceAsStream("/models/cat/cat_spec.jpg"), true);
+		//diffuseTexture = new Texture(gl, getClass().getResourceAsStream("/models/cat/cat_diff.jpg"), true);
+		//normalTexture = new Texture(gl, getClass().getResourceAsStream("/models/cat/cat_norm.jpg"), true);
+		//specularTexture = new Texture(gl, getClass().getResourceAsStream("/models/cat/cat_spec.jpg"), true);
 
 		int[] vertexArray = new int[1];
 		gl.glGenVertexArrays(1, vertexArray, 0);
@@ -333,11 +333,9 @@ public class Monster extends GameObject implements Drawable, Updatable {
 		// I'm not too sure why disabling this works but enabling doesn't.
 		//gl.glEnableVertexAttribArray(2);
 
-		GL4 gl4 = gl.getGL4();
-
-		int diffuseTextureLoc = gl4.glGetUniformLocation(shaderProgram, "diffuseTexture");
-		int normalTextureLoc = gl4.glGetUniformLocation(shaderProgram, "normalTexture");
-		int specularTextureLoc = gl4.glGetUniformLocation(shaderProgram, "specularTexture");
+		int diffuseTextureLoc = gl.glGetUniformLocation(shaderProgram, "diffuseTexture");
+		int normalTextureLoc = gl.glGetUniformLocation(shaderProgram, "normalTexture");
+		int specularTextureLoc = gl.glGetUniformLocation(shaderProgram, "specularTexture");
 
 		gl.glUniform1i(diffuseTextureLoc, 0);
 		gl.glUniform1i(normalTextureLoc, 2);
