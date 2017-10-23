@@ -155,7 +155,7 @@ public class LevelIO {
 		JSONArray trees = new JSONArray();
 		for (LSystemTrees t : terrain.trees()) {
 			JSONObject j = new JSONObject();
-			Vector3 position = t.getPosition();
+			Vector3 position = t.transform.position;
 			j.put("x", position.x);
 			j.put("z", position.z);
 			trees.put(j);

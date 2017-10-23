@@ -7,6 +7,8 @@ import com.jogamp.opengl.glu.GLUquadric;
 import ass2.math.Vector3;
 import ass2.math.Vector4f;
 
+import java.util.Random;
+
 public class LSystemTrees extends GameObject implements Drawable {
 
 	private String initialValue;
@@ -30,6 +32,8 @@ public class LSystemTrees extends GameObject implements Drawable {
 		this.transform.position = new Vector3(x, y, z);
 		material = new Material();
 		material.diffuse = new Vector4f(0.5f, 0.35f, 0.05f, 0.0f);
+		Random rand = new Random();
+		this.transform.rotation.y = rand.nextDouble() % 360.0;
 	}
 	
 	private String generateString(){
@@ -46,10 +50,6 @@ public class LSystemTrees extends GameObject implements Drawable {
 			//System.out.println(currString);
 		}
 		return currString;
-	}
-	
-	public Vector3 getPosition() {
-		return transform.position.clone();
 	}
 	
 	private void drawBranch(GL2 gl, int branchDepth){
