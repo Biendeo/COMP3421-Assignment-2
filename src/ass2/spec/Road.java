@@ -57,7 +57,7 @@ public class Road extends GameObject implements Drawable {
 	public Road(GameObject parent, double width, double[] spine, double altitude) {
 		super(parent);
 		myWidth = width;
-		this.myAltitude = altitude + 0.008;
+		this.myAltitude = altitude;
 		myPoints = new ArrayList<Double>();
 		for (int i = 0; i < spine.length; i++) {
 			myPoints.add(spine[i]);
@@ -322,6 +322,11 @@ public class Road extends GameObject implements Drawable {
 		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
 		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
 
+		gl.glEnable(GL2.GL_POLYGON_OFFSET_POINT);
+		gl.glEnable(GL2.GL_POLYGON_OFFSET_LINE);
+		gl.glEnable(GL2.GL_POLYGON_OFFSET_FILL);
+		gl.glPolygonOffset(-1.0f, -1.0f);
+
 		gl.glBegin(GL2.GL_TRIANGLE_STRIP);
 		final double textureScale = 0.25;
 		double spineDist=0;
@@ -342,7 +347,12 @@ public class Road extends GameObject implements Drawable {
     		bezierCount++;
 		}
 		gl.glEnd();
-		
+
+		gl.glPolygonOffset(0.0f, 0.0f);
+		gl.glDisable(GL2.GL_POLYGON_OFFSET_POINT);
+		gl.glDisable(GL2.GL_POLYGON_OFFSET_LINE);
+		gl.glDisable(GL2.GL_POLYGON_OFFSET_FILL);
+
 //		gl.glDisable(GL2.GL_LIGHTING);
 //		gl.glBegin(GL2.GL_LINES);
 //		for (int i=0;i+2<this.vertexMesh.size(); i+=2){
@@ -363,7 +373,7 @@ public class Road extends GameObject implements Drawable {
 //		gl.glEnd();
 //		gl.glEnable(GL2.GL_LIGHTING);
 		
-		
+		gl.glBindTexture(GL2.GL_TEXTURE_2D, 0);
 	}
 
 
