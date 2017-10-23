@@ -1,7 +1,6 @@
 package ass2.spec;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JFrame;
@@ -12,6 +11,7 @@ import ass2.math.Vector3f;
 import ass2.math.Vector4f;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLJPanel;
+import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.FPSAnimator;
 
 
@@ -61,7 +61,10 @@ public class Game extends JFrame implements GLEventListener {
 		panel.addGLEventListener(this);
  
 		// Add an animator to call 'display' at 60fps
-		FPSAnimator animator = new FPSAnimator(60);
+		// NOTE: I commented this out and replaced it with an unlocked framerate to measure frame
+		// times. Everything should be controlled by that anyway.
+		///FPSAnimator animator = new FPSAnimator(60);
+		Animator animator = new Animator();
 		animator.add(panel);
 		animator.start();
 
@@ -107,6 +110,8 @@ public class Game extends JFrame implements GLEventListener {
 		long time = System.nanoTime();
 		double dt = (time - myTime) / 1000000000.0;
 		myTime = time;
+
+		setTitle("Assignment 2 - FPS: " + Double.toString(1 / dt));
 
 		// Update the input.
 		Input.updateState();
