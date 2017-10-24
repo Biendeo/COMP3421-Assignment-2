@@ -32,6 +32,8 @@ public class Game extends JFrame implements GLEventListener {
 	private List<Light> lights;
 	private List<Texture> textures;
 
+	private double dt;
+
 	public Game(Terrain terrain) {
 		super("Assignment 2");
 		myTime = 0L;
@@ -108,7 +110,7 @@ public class Game extends JFrame implements GLEventListener {
 
 		// compute the time since the last frame
 		long time = System.nanoTime();
-		double dt = (time - myTime) / 1000000000.0;
+		dt = (time - myTime) / 1000000000.0;
 		myTime = time;
 
 		setTitle("Assignment 2 - FPS: " + Double.toString(1 / dt));
@@ -171,6 +173,8 @@ public class Game extends JFrame implements GLEventListener {
 		}
 
 		GameObject.ROOT.tryDraw(gl);
+
+		currentCamera.postProcess(gl, dt);
 		
 	}
 
