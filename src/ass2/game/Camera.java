@@ -51,9 +51,9 @@ public class Camera extends GameObject {
 		// This is mostly copied from my assignment 1.
 		if (!initialisedShaders) {
 			try {
-				postProcessingShaders.add(Shader.initShaders(gl, getClass().getResourceAsStream("/shaders/postgeneric_vert.glsl"), getClass().getResourceAsStream("/shaders/sine_frag.glsl")));
-				postProcessTextures = new int[postProcessingShaders.size()];
-				gl.glGenTextures(postProcessingShaders.size(), postProcessTextures, 0);
+				postProcessingShaders.add(Shader.initShaders(gl, getClass().getResourceAsStream("/shaders/postgeneric_vert.glsl"), getClass().getResourceAsStream("/shaders/depthshade_frag.glsl")));
+				postProcessTextures = new int[postProcessingShaders.size() * 2];
+				gl.glGenTextures(postProcessTextures.length, postProcessTextures, 0);
 
 				for (int i : postProcessTextures) {
 					generatePostProcessBuffer(gl, i);
@@ -119,7 +119,7 @@ public class Camera extends GameObject {
 	 * Gets called whenever the window is resized, and handles representing the FOV and aspect.
 	 * @param gl
 	 * @param x
-	 * @param y
+	 * @param dy
 	 * @param width
 	 * @param height
 	 */
@@ -136,8 +136,8 @@ public class Camera extends GameObject {
 		}
 
 		if (postProcessingShaders.size() > 0) {
-			postProcessTextures = new int[postProcessingShaders.size()];
-			gl.glGenTextures(postProcessingShaders.size(), postProcessTextures, 0);
+			postProcessTextures = new int[postProcessingShaders.size() * 2];
+			gl.glGenTextures(postProcessTextures.length, postProcessTextures, 0);
 
 			for (int i : postProcessTextures) {
 				generatePostProcessBuffer(gl, i);
@@ -160,8 +160,8 @@ public class Camera extends GameObject {
 
 		if (postProcessTextures != null) {
 			gl.glDisable(GL2.GL_LIGHTING);
-			gl.glDisable(GL2.GL_DEPTH_TEST);
 			gl.glEnable(GL2.GL_TEXTURE_2D);
+			gl.glDepthMask(false);
 
 			gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
 			gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
@@ -173,21 +173,24 @@ public class Camera extends GameObject {
 			gl.glMatrixMode(GL2.GL_MODELVIEW);
 			gl.glLoadIdentity();
 
-			for (int i = 0; i < postProcessTextures.length; ++i) {
+			for (int i = 0; i < postProcessTextures.length; i += 2) {
+
+				gl.glActiveTexture(GL2.GL_TEXTURE0);
 				gl.glBindTexture(GL2.GL_TEXTURE_2D, postProcessTextures[i]);
 				gl.glCopyTexImage2D(GL2.GL_TEXTURE_2D, 0, GL2.GL_RGBA, 0, 0, width, height, 0);
 
-				gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-				gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
+				gl.glActiveTexture(GL2.GL_TEXTURE2);
+				gl.glEnable(GL2.GL_TEXTURE_2D);
+				gl.glBindTexture(GL2.GL_TEXTURE_2D, postProcessTextures[i + 1]);
+				gl.glCopyTexImage2D(GL2.GL_TEXTURE_2D, 0, GL2.GL_DEPTH_COMPONENT24, 0, 0, width, height, 0);
 
 				gl.glUseProgram(postProcessingShaders.get(i));
 
 				if (i == 0) {
-					int textureLoc = gl.glGetAttribLocation(postProcessingShaders.get(i), "v_coord");
+					int textureLoc = gl.glGetUniformLocation(postProcessingShaders.get(i), "fbo_texture");
 					gl.glUniform1i(textureLoc, 0);
-					int offsetLoc = gl.glGetUniformLocation(postProcessingShaders.get(i), "offset");
-					gl.glUniform1f(offsetLoc, (float)time);
-
+					int depthTextureLoc = gl.glGetUniformLocation(postProcessingShaders.get(i), "depth_texture");
+					gl.glUniform1i(depthTextureLoc, 2);
 				}
 
 				gl.glBegin(GL2.GL_QUADS);
@@ -203,10 +206,15 @@ public class Camera extends GameObject {
 			}
 
 			gl.glUseProgram(0);
+			gl.glActiveTexture(GL2.GL_TEXTURE0);
 			gl.glBindTexture(GL2.GL_TEXTURE_2D, 0);
+			gl.glActiveTexture(GL2.GL_TEXTURE2);
+			gl.glBindTexture(GL2.GL_TEXTURE_2D, 0);
+			gl.glActiveTexture(GL2.GL_TEXTURE0);
 			gl.glEnable(GL2.GL_LIGHTING);
 			gl.glEnable(GL2.GL_DEPTH_TEST);
 			gl.glDisable(GL2.GL_TEXTURE_2D);
+			gl.glDepthMask(true);
 		}
 	}
 }
