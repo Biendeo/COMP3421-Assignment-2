@@ -5,12 +5,13 @@ import ass2.math.Vector4;
 import ass2.math.Vector4f;
 import com.jogamp.opengl.GL2;
 
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
 /**
  * Handles viewing the world.
  */
-public class Camera extends GameObject {
+public class Camera extends GameObject implements Updatable {
 	public Vector4f clearColor;
 
 	public double nearPlane;
@@ -25,6 +26,11 @@ public class Camera extends GameObject {
 
 	private double time;
 	private boolean initialisedShaders;
+
+	private int depthOfFieldSamples;
+	private float depthOfFieldSpread;
+	private float depthOfFieldNear;
+	private float depthOfFieldFar;
 
 	/**
 	 * Constructs a camera object with
@@ -41,6 +47,11 @@ public class Camera extends GameObject {
 		postProcessingShaders = new ArrayList<Integer>();
 		time = 0.0;
 		initialisedShaders = false;
+
+		depthOfFieldSamples = 5;
+		depthOfFieldSpread = 0.01f;
+		depthOfFieldNear = 0.8f;
+		depthOfFieldFar = 0.95f;
 	}
 
 	/**
@@ -51,7 +62,7 @@ public class Camera extends GameObject {
 		// This is mostly copied from my assignment 1.
 		if (!initialisedShaders) {
 			try {
-				postProcessingShaders.add(Shader.initShaders(gl, getClass().getResourceAsStream("/shaders/postgeneric_vert.glsl"), getClass().getResourceAsStream("/shaders/depthshade_frag.glsl")));
+				postProcessingShaders.add(Shader.initShaders(gl, getClass().getResourceAsStream("/shaders/postgeneric_vert.glsl"), getClass().getResourceAsStream("/shaders/depthoffield_frag.glsl")));
 				postProcessTextures = new int[postProcessingShaders.size() * 2];
 				gl.glGenTextures(postProcessTextures.length, postProcessTextures, 0);
 
@@ -161,7 +172,7 @@ public class Camera extends GameObject {
 		if (postProcessTextures != null) {
 			gl.glDisable(GL2.GL_LIGHTING);
 			gl.glEnable(GL2.GL_TEXTURE_2D);
-			gl.glDepthMask(false);
+			//gl.glDepthMask(false);
 
 			gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
 			gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
@@ -191,6 +202,14 @@ public class Camera extends GameObject {
 					gl.glUniform1i(textureLoc, 0);
 					int depthTextureLoc = gl.glGetUniformLocation(postProcessingShaders.get(i), "depth_texture");
 					gl.glUniform1i(depthTextureLoc, 2);
+					int samplesLoc = gl.glGetUniformLocation(postProcessingShaders.get(i), "sampleCount");
+					gl.glUniform1i(samplesLoc, depthOfFieldSamples);
+					int spreadLoc = gl.glGetUniformLocation(postProcessingShaders.get(i), "spread");
+					gl.glUniform1f(spreadLoc, depthOfFieldSpread);
+					int nearLoc = gl.glGetUniformLocation(postProcessingShaders.get(i), "nearValue");
+					gl.glUniform1f(nearLoc, depthOfFieldNear);
+					int farLoc = gl.glGetUniformLocation(postProcessingShaders.get(i), "farValue");
+					gl.glUniform1f(farLoc, depthOfFieldFar);
 				}
 
 				gl.glBegin(GL2.GL_QUADS);
@@ -215,6 +234,54 @@ public class Camera extends GameObject {
 			gl.glEnable(GL2.GL_DEPTH_TEST);
 			gl.glDisable(GL2.GL_TEXTURE_2D);
 			gl.glDepthMask(true);
+		}
+	}
+
+	@Override
+	public void update(double dt) {
+		if (Input.getKeyDown(KeyEvent.VK_PAGE_UP)) {
+			++depthOfFieldSamples;
+			System.out.println("Depth of field samples: " + Integer.toString(depthOfFieldSamples));
+		}
+		if (Input.getKeyDown(KeyEvent.VK_PAGE_DOWN)) {
+			if (depthOfFieldSamples > 2) {
+				--depthOfFieldSamples;
+				System.out.println("Depth of field samples: " + Integer.toString(depthOfFieldSamples));
+			}
+		}
+		if (Input.getKeyDown(KeyEvent.VK_HOME)) {
+			depthOfFieldSpread += 0.0005f;
+			System.out.println("Depth of field samples: " + Float.toString(depthOfFieldSpread));
+		}
+		if (Input.getKeyDown(KeyEvent.VK_END)) {
+			if (depthOfFieldSpread > 0.0f) {
+				depthOfFieldSpread -= 0.0005f;
+				System.out.println("Depth of field spread: " + Float.toString(depthOfFieldSpread));
+			}
+		}
+		if (Input.getKeyDown(KeyEvent.VK_NUMPAD8)) {
+			if (depthOfFieldNear < 1.0f) {
+				depthOfFieldNear += 0.0005f;
+				System.out.println("Depth of field near: " + Float.toString(depthOfFieldNear));
+			}
+		}
+		if (Input.getKeyDown(KeyEvent.VK_NUMPAD2)) {
+			if (depthOfFieldNear > 0.0f) {
+				depthOfFieldNear -= 0.0005f;
+				System.out.println("Depth of field near: " + Float.toString(depthOfFieldNear));
+			}
+		}
+		if (Input.getKeyDown(KeyEvent.VK_NUMPAD6)) {
+			if (depthOfFieldFar < 1.0f) {
+				depthOfFieldFar += 0.0005f;
+				System.out.println("Depth of field far: " + Float.toString(depthOfFieldFar));
+			}
+		}
+		if (Input.getKeyDown(KeyEvent.VK_NUMPAD4)) {
+			if (depthOfFieldFar > 0.0f) {
+				depthOfFieldFar -= 0.0005f;
+				System.out.println("Depth of field far: " + Float.toString(depthOfFieldFar));
+			}
 		}
 	}
 }
