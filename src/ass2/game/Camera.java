@@ -1,7 +1,6 @@
 package ass2.game;
 
 import ass2.math.Vector3;
-import ass2.math.Vector4;
 import ass2.math.Vector4f;
 import com.jogamp.opengl.GL2;
 
@@ -50,8 +49,8 @@ public class Camera extends GameObject implements Updatable {
 
 		depthOfFieldSamples = 5;
 		depthOfFieldSpread = 0.01f;
-		depthOfFieldNear = 0.8f;
-		depthOfFieldFar = 0.95f;
+		depthOfFieldNear = 0.97f;
+		depthOfFieldFar = 0.99f;
 	}
 
 	/**
@@ -62,12 +61,15 @@ public class Camera extends GameObject implements Updatable {
 		// This is mostly copied from my assignment 1.
 		if (!initialisedShaders) {
 			try {
-				postProcessingShaders.add(Shader.initShaders(gl, getClass().getResourceAsStream("/shaders/postgeneric_vert.glsl"), getClass().getResourceAsStream("/shaders/depthoffield_frag.glsl")));
-				postProcessTextures = new int[postProcessingShaders.size() * 2];
-				gl.glGenTextures(postProcessTextures.length, postProcessTextures, 0);
+				postProcessingShaders.add(Shader.initShaders(gl, getClass().getResourceAsStream("/shaders/postgeneric_vert.glsl"), getClass().getResourceAsStream("/shaders/depthoffield_boxblur_frag.glsl")));
+				if (postProcessingShaders.size() > 0) {
+					postProcessTextures = new int[postProcessingShaders.size() * 2];
+					gl.glGenTextures(postProcessTextures.length, postProcessTextures, 0);
 
-				for (int i : postProcessTextures) {
-					generatePostProcessBuffer(gl, i);
+					for (int i = 0; i < postProcessTextures.length; i += 2) {
+						generatePostProcessBuffer(gl, i, true);
+						generatePostProcessBuffer(gl, i + 1, false);
+					}
 				}
 				gl.glBindTexture(GL2.GL_TEXTURE_2D, 0);
 				initialisedShaders = true;
@@ -150,18 +152,24 @@ public class Camera extends GameObject implements Updatable {
 			postProcessTextures = new int[postProcessingShaders.size() * 2];
 			gl.glGenTextures(postProcessTextures.length, postProcessTextures, 0);
 
-			for (int i : postProcessTextures) {
-				generatePostProcessBuffer(gl, i);
+			for (int i = 0; i < postProcessTextures.length; i += 2) {
+				generatePostProcessBuffer(gl, i, true);
+				generatePostProcessBuffer(gl, i + 1, false);
 			}
 			gl.glBindTexture(GL2.GL_TEXTURE_2D, 0);
 		}
 	}
 
-	private void generatePostProcessBuffer(GL2 gl, int textureID) {
+	private void generatePostProcessBuffer(GL2 gl, int textureID, boolean mipmaps) {
 		gl.glBindTexture(GL2.GL_TEXTURE_2D, textureID);
 		gl.glTexImage2D(GL2.GL_TEXTURE_2D, 0, GL2.GL_RGBA, width, height, 0, GL2.GL_RGBA, GL2.GL_UNSIGNED_BYTE, null);
-		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
-		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
+		if (mipmaps) {
+			gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR_MIPMAP_LINEAR);
+			gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR_MIPMAP_LINEAR);
+		} else {
+			gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
+			gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
+		}
 		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP);
 		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP);
 	}
@@ -172,7 +180,7 @@ public class Camera extends GameObject implements Updatable {
 		if (postProcessTextures != null) {
 			gl.glDisable(GL2.GL_LIGHTING);
 			gl.glEnable(GL2.GL_TEXTURE_2D);
-			//gl.glDepthMask(false);
+			gl.glDepthMask(false);
 
 			gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
 			gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
@@ -184,16 +192,25 @@ public class Camera extends GameObject implements Updatable {
 			gl.glMatrixMode(GL2.GL_MODELVIEW);
 			gl.glLoadIdentity();
 
-			for (int i = 0; i < postProcessTextures.length; i += 2) {
-
+			for (int i = 0; i < postProcessingShaders.size(); ++i) {
 				gl.glActiveTexture(GL2.GL_TEXTURE0);
-				gl.glBindTexture(GL2.GL_TEXTURE_2D, postProcessTextures[i]);
+				gl.glBindTexture(GL2.GL_TEXTURE_2D, postProcessTextures[2 * i]);
 				gl.glCopyTexImage2D(GL2.GL_TEXTURE_2D, 0, GL2.GL_RGBA, 0, 0, width, height, 0);
+				gl.glGenerateMipmap(GL2.GL_TEXTURE_2D);
+
+				gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
+				gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
+				gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE);
 
 				gl.glActiveTexture(GL2.GL_TEXTURE2);
 				gl.glEnable(GL2.GL_TEXTURE_2D);
-				gl.glBindTexture(GL2.GL_TEXTURE_2D, postProcessTextures[i + 1]);
+				gl.glBindTexture(GL2.GL_TEXTURE_2D, postProcessTextures[2 * i + 1]);
 				gl.glCopyTexImage2D(GL2.GL_TEXTURE_2D, 0, GL2.GL_DEPTH_COMPONENT24, 0, 0, width, height, 0);
+				gl.glGenerateMipmap(GL2.GL_TEXTURE_2D);
+
+				gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
+				gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
+				gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE);
 
 				gl.glUseProgram(postProcessingShaders.get(i));
 
@@ -210,6 +227,23 @@ public class Camera extends GameObject implements Updatable {
 					gl.glUniform1f(nearLoc, depthOfFieldNear);
 					int farLoc = gl.glGetUniformLocation(postProcessingShaders.get(i), "farValue");
 					gl.glUniform1f(farLoc, depthOfFieldFar);
+					int directionLoc = gl.glGetUniformLocation(postProcessingShaders.get(i), "direction");
+					gl.glUniform1f(directionLoc, 0);
+				} else {
+					int textureLoc = gl.glGetUniformLocation(postProcessingShaders.get(i), "fbo_texture");
+					gl.glUniform1i(textureLoc, 0);
+					int depthTextureLoc = gl.glGetUniformLocation(postProcessingShaders.get(i), "depth_texture");
+					gl.glUniform1i(depthTextureLoc, 2);
+					int samplesLoc = gl.glGetUniformLocation(postProcessingShaders.get(i), "sampleCount");
+					gl.glUniform1i(samplesLoc, depthOfFieldSamples);
+					int spreadLoc = gl.glGetUniformLocation(postProcessingShaders.get(i), "spread");
+					gl.glUniform1f(spreadLoc, depthOfFieldSpread);
+					int nearLoc = gl.glGetUniformLocation(postProcessingShaders.get(i), "nearValue");
+					gl.glUniform1f(nearLoc, depthOfFieldNear);
+					int farLoc = gl.glGetUniformLocation(postProcessingShaders.get(i), "farValue");
+					gl.glUniform1f(farLoc, depthOfFieldFar);
+					int directionLoc = gl.glGetUniformLocation(postProcessingShaders.get(i), "direction");
+					gl.glUniform1f(directionLoc, 1);
 				}
 
 				gl.glBegin(GL2.GL_QUADS);

@@ -16,7 +16,7 @@ void main() {
         if (depthPixel < nearValue) {
             adjustedSpread = min(spread, (nearValue - depthPixel) * 20 * spread);
         } else {
-            adjustedSpread = min(spread, (depthPixel - farValue) * 20 * spread);
+            adjustedSpread = min(spread, (depthPixel - farValue) * 50 * spread);
         }
         vec4 outputColor = vec4(0.0, 0.0, 0.0, 1.0);
         for (int i = 0; i < sampleCount; ++i) {
